@@ -1,0 +1,75 @@
+nav {
+  width: 100%;
+  padding: 2rem;
+
+  --nav-background-light: #83ddd6;
+  --nav-background-dark: #3d7c77;
+  --button-background-light: #5ec5ee;
+  --button-background-dark: #28596d;
+  --border-color-light: #131313;
+  --border-color-dark: #f7f7f7;
+}
+nav ul {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  gap: 30px;
+}
+nav ul li:first-child {
+  margin-right: auto;
+}
+nav ul li:last-child {
+  margin-left: auto;
+}
+nav a {
+  position: relative;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+nav a::before {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  border-radius: 50rem;
+  background-color: burlywood;
+  transition: all 0.3s ease;
+}
+nav li:not(li:first-child, li:last-child):hover a::before {
+  width: 100%;
+}
+nav button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color-light);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+nav button a {
+  font-size: 1rem;
+}
+nav button:hover {
+  transform: scale(1.05);
+}
+
+@media (prefers-color-scheme: light) {
+  nav {
+    background-color: var(--nav-background-light);
+  }
+  nav button {
+    background-color: var(--button-background-light);
+    border: 1px solid var(--border-color-light);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  nav {
+    background-color: var(--nav-background-dark);
+  }
+  nav button {
+    background-color: var(--button-background-dark);
+    border: 1px solid var(--border-color-dark);
+  }
+}

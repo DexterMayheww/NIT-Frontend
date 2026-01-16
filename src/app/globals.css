@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+  font-family: var(--font-kumbh-sans), sans-serif;
+}
+
+body {
+  min-height: 100svh;
+}
+
+/* Custom scrollbar for notice board */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #001d1b;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #006a58;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00ffcc;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Marquee animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Bubble styles for stats section */
+.containr.ourNumber {
+  position: relative;
+}
+.bubble {
+  position: absolute;
+  background: linear-gradient(135deg, #00ffcc 0%, #00b894 100%);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 255, 204, 0.3);
+  transition: transform 0.3s ease;
+}
+.bubble:hover {
+  transform: scale(1.1);
+}
+.bubble-center {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.bubble-icon {
+  color: #002a28;
+}
+.bubble-number {
+  font-size: 2.5rem;
+  color: #002a28;
+}
+.bubble-label {
+  font-size: 0.875rem;
+  color: #002a28;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.dark-invert { filter: invert(1) hue-rotate(180deg); background-color: #000; }
+.dark-invert img, .dark-invert video, .dark-invert iframe, .dark-invert .no-invert { 
+    filter: invert(1) hue-rotate(180deg) !important; 
+}
