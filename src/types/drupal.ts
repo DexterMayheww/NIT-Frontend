@@ -166,6 +166,7 @@ export interface ProcessedDrupalContent {
   details: string | null;
   homeDetails: string | null;
   editor: string | null;
+  editors: string[],
   images: { url: string; alt: string }[];
   videos: { url: string; name: string }[];
   files: { url: string; filename: string }[];

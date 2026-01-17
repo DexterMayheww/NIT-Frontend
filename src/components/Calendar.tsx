@@ -184,7 +184,7 @@ export const Calendar: React.FC<ContinuousCalendarProps> = ({ onClick }) => {
 
     return (
         <>
-            <div className="calendar-container no-scrollbar mx-auto h-[750px] max-w-7xl overflow-y-scroll rounded-[2.5rem] bg-[#013A33] pb-20 text-white shadow-2xl border border-[#006A58]">
+            <div className="calendar-container no-scrollbar mx-auto h-[750px] max-w-7xl overflow-y-scroll bg-[#013A33] pb-20 text-white shadow-2xl border border-[#006A58]">
                 {/* Sticky Header */}
                 <div className="sticky top-0 z-50 w-full bg-[#002A28]/95 backdrop-blur-md px-5 py-6 sm:px-8 border-b border-[#006A58]">
                     <div className="flex flex-wrap items-center justify-between w-full gap-4 mb-6">

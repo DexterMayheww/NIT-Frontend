@@ -4,7 +4,7 @@ import { getNodeByPath } from '@/lib/drupal/generated';
 import { notFound } from 'next/navigation';
 import { Target, Eye } from 'lucide-react';
 import { Footer } from '@/components/Footer';
-import { AboutSidebar } from '@/components/sidebars/AboutSidebar';
+import { Sidebar } from '@/components/Sidebar';
 
 export default async function VisionMissionPage() {
     // Fetch dynamic content from Drupal
@@ -66,7 +66,7 @@ export default async function VisionMissionPage() {
                     </main>
 
                     {/* --- SIDEBAR AREA --- */}
-                    <AboutSidebar links={quickLinks} />
+                    <Sidebar links={quickLinks} />
 
                 </div>
             </div>

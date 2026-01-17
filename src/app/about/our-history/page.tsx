@@ -2,7 +2,7 @@
 
 import { getNodeByPath } from '@/lib/drupal/generated';
 import { notFound } from 'next/navigation';
-import { AboutSidebar } from '@/components/sidebars/AboutSidebar';
+import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 
 interface HistoryRecord {
@@ -83,6 +83,7 @@ export default async function OurHistoryPage() {
   ];
 
   const historySections = parseHistoryContent(data.editor || '');
+  console.log("History editor: ", data.editor);
 
   return (
     <>
@@ -138,7 +139,7 @@ export default async function OurHistoryPage() {
           </div>
 
           {/* --- SIDEBAR --- */}
-        <AboutSidebar links={quickLinks} />
+        <Sidebar links={quickLinks} />
         </div>
       </main>
       

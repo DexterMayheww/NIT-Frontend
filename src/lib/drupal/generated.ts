@@ -84,6 +84,15 @@ export function processNode(
     }
   }
 
+  let editors: string[] = [];
+  if (Array.isArray(attrs.field_editors)) {
+    editors = attrs.field_editors.map((ed: any) => ed.processed);
+  } else if (attrs.field_editors?.processed) {
+    editors = [attrs.field_editors.processed];
+  }
+  console.log("Field Editors", attrs.field_editors);
+  console.log("Field Editor", attrs.field_editor);
+
   return {
     id: node.id,
     nid: attrs.drupal_internal__nid, 
@@ -92,6 +101,7 @@ export function processNode(
     details: attrs.field_details || null,
     homeDetails: attrs.field_home_details || null,
     editor: attrs.field_editor?.processed || attrs.body?.processed || null,
+    editors: editors,
     images: images.map((img) => ({ url: img.url, alt: img.alt })),
     videos: videos.map((vid) => ({ url: vid.url, name: vid.name })),
     files,
@@ -161,6 +171,7 @@ export async function getNodeByPath(
   // 3. Process the single node
   // In a collection fetch, data is an array. In an individual fetch, data is a single object.
   const node = response.data.data;
+  console.log("Node data: ", node);
 
   return {
     data: processNode(node, response.data.included),
@@ -288,13 +299,7 @@ export async function getChildNodes(
     `/jsonapi/node/${contentType}`,
     {
       ...options,
-      params: {
-        'filter[path.alias][condition][path]': 'path.alias',
-        'filter[path.alias][condition][operator]': 'STARTS_WITH',
-        'filter[path.alias][condition][value]': `${parentPath}/`,
-        'include': 'field_images,field_images.field_media_image',
-        'sort': 'title',
-      },
+
     }
   );
 

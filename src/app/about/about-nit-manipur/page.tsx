@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Footer } from '@/components/Footer';
 import { getDrupalData } from '@/lib/drupal/getDrupalData';
-import { AboutSidebar } from '@/components/sidebars/AboutSidebar';
+import { Sidebar } from '@/components/Sidebar';
 
 export default async function AboutNITPage() {
     // Fetch data from Drupal using the decoupled router path
@@ -49,6 +49,7 @@ export default async function AboutNITPage() {
                                         className="rounded-[20px] border border-gray-200 shadow-[-10px_10px_20px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-[1.01]"
                                         priority
                                         unoptimized={process.env.NODE_ENV === 'development'}
+                                        
                                     />
                                 </div>
                             </div>
@@ -72,7 +73,7 @@ export default async function AboutNITPage() {
                     </main>
 
                     {/* --- SIDEBAR (Quick Links) --- */}
-                    <AboutSidebar links={quickLinks} />
+                    <Sidebar links={quickLinks} />
 
                 </div>
             </div>

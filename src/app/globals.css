@@ -105,3 +105,46 @@ body {
 .dark-invert img, .dark-invert video, .dark-invert iframe, .dark-invert .no-invert { 
     filter: invert(1) hue-rotate(180deg) !important; 
 }
+/* --- INFINITE MARQUEE SYSTEM --- */
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 15%,
+    black 85%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 15%,
+    black 85%,
+    transparent
+  );
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 60s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track:has(.marquee-card:hover) {
+  animation-play-state: paused;
+}
+
+.marquee-card {
+  flex-shrink: 0;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}

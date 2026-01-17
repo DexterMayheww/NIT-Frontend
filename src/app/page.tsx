@@ -3,11 +3,11 @@ import { getDepartments } from '@/lib/drupal/generated';
 import { NoticeBoard, AdmissionTabs } from '@/components/HomeClient';
 import Link from 'next/link';
 import Image from 'next/image';
-
 import { StatsSection } from '@/components/StatsSection';
 import { GalleryCarousel } from '@/components/GalleryCarousel';
 import { Footer } from '@/components/Footer';
 import { getDrupalData } from '@/lib/drupal/getDrupalData';
+import { parseQuickLinks, parseCompanyMarquee, parsePlacementTable } from '@/lib/parser';
 
 export default async function Page() {
 	// const DRUPAL_DOMAIN = getDrupalDomain();
@@ -47,11 +47,15 @@ export default async function Page() {
 		link: dept.path || `/department/${dept.title.toLowerCase().replace(/\s+/g, '-')}`,
 	}));
 
+	// Data Extraction from Multiple Editors
+	const quickLinks = homeData?.editors?.[0] ? parseQuickLinks(homeData.editors[0]) : [];
+	const placementCompanies = homeData?.editors?.[1] ? parseCompanyMarquee(homeData.editors[1]) : [];
+	const placementStudents = homeData?.editors?.[2] ? parsePlacementTable(homeData.editors[2]) : [];
+
+
 	const homeVideo = homeData?.videos?.[0]?.url || '/vid/nitDrone.mp4';
 	const directorImg = director?.images?.[0]?.url || '/photo/nitDirector.png';
 	const aboutImg = aboutNit?.images?.[0]?.url || '/photo/aboutNit.png';
-
-	console.log('Home Data:', homeData);
 
 	return (
 		<>
@@ -64,35 +68,36 @@ export default async function Page() {
 						<source src={homeVideo} type="video/mp4" />
 					</video>
 
-					{/* Content Overlay */}
-					<div className="relative z-10 grid items-center w-full grid-cols-1 gap-10 px-4 py-10 mx-auto max-w-7xl lg:grid-cols-2">
-
-						{/* Notice Board Area */}
-						<div className="order-2 lg:order-1">
-							<NoticeBoard />
-						</div>
-
-						{/* Empty Right side */}
-						<div className="hidden lg:block"></div>
-					</div>
-
 					{/* Gradient Overlay at bottom */}
 					<div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#013A33] to-transparent z-0"></div>
 				</section>
 
-				{/* --- SECTION 2: MARQUEE --- */}
-				<div className="bg-[#002A28] py-3 border-y border-[#006A58] overflow-hidden">
-					<div className="whitespace-nowrap animate-marquee flex gap-20 text-[#00FFCC] font-bold text-lg">
-						<a href="#" className="transition hover:text-white">🌟 Welcome to NIT Manipur Official Website</a>
-						<a href="#" className="transition hover:text-white">📢 Check out the latest Tender Notifications</a>
-						<a href="#" className="transition hover:text-white">🎉 Convocation 2025 Registration Open</a>
-						<a href="#" className="transition hover:text-white">📞 Contact Administration: 0385-2445812</a>
+				{/* --- SECTION 2: QUICK LINKS MARQUEE --- */}
+				<div className="bg-[#002A28] py-4 border-y border-[#006A58] overflow-hidden sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+					<div className="flex gap-16 whitespace-nowrap animate-marquee">
+						{quickLinks.map((link, i) => (
+							<Link key={i} href={link.href} className="text-[#00FFCC] font-bold text-lg hover:text-white transition-colors flex items-center gap-2">
+								<span className="text-xs">⚡</span> {link.title}
+							</Link>
+						))}
+						{/* Duplicate for seamless loop */}
+						{quickLinks.map((link, i) => (
+							<Link key={`dup-${i}`} href={link.href} className="text-[#00FFCC] font-bold text-lg hover:text-white transition-colors flex items-center gap-2">
+								<span className="text-xs">⚡</span> {link.title}
+							</Link>
+						))}
 					</div>
 				</div>
 
+
+				<section className='m-12'>
+					<NoticeBoard />
+				</section>
+
+
 				{/* --- SECTION 3: VISION, MISSION & ABOUT --- */}
-				<section className="py-20 px-4 bg-[#013A33]">
-					<div className="flex flex-col-reverse items-stretch gap-10 mx-auto max-w-7xl lg:flex-row">
+				<section className="py-20 px-4 bg-[#013A33] m-12">
+					<div className="flex flex-col-reverse items-stretch gap-10 mx-auto lg:flex-row">
 
 						{/* Left: About Text */}
 						<div style={{ backgroundImage: `url(${aboutImg})` }} className={`lg:w-1/2 flex flex-col justify-center bg-cover bg-center bg-no-repeat rounded-3xl overflow-hidden relative min-h-[500px] shadow-2xl group`}>
@@ -144,23 +149,23 @@ export default async function Page() {
 
 				{/* --- SECTION 4: DIRECTOR'S MESSAGE --- */}
 				<section className="py-20 bg-[#002A28] relative">
-					<div className="px-4 mx-auto max-w-7xl">
+					<div className="px-4 m-12">
 						<h2 className="mb-16 text-5xl font-bold text-center text-white drop-shadow-lg">Director&apos;s Message</h2>
 
 						<div className="flex flex-col lg:flex-row items-center gap-12 bg-[#013A33] rounded-3xl p-8 md:p-12 shadow-2xl border border-[#006A58]">
-							<div className="relative lg:w-1/2">
+							<div className="relative lg:w-1/5">
 								<div className="absolute inset-0 bg-[#00FFCC] blur-3xl opacity-10 rounded-full"></div>
 								<Image
 									src={directorImg}
 									alt="Director"
-									className="relative z-10 w-full rounded-2xl shadow-lg transform transition duration-500 hover:scale-[1.02]"
+									className="relative z-10 rounded-2xl shadow-lg transform transition duration-500 hover:scale-[1.02] h-[400px] w-auto"
 									width={100}
 									height={100}
 									unoptimized={process.env.NODE_ENV === 'development'}
 								/>
 							</div>
 
-							<div className="text-center lg:w-1/2 lg:text-left">
+							<div className="text-center lg:w-4/5 lg:text-left">
 								<h3 className="text-3xl md:text-4xl font-bold mb-2 text-[#00FFCC]">
 									{director?.title || 'Prof. D V L N Somayajulu'}
 								</h3>
@@ -171,7 +176,7 @@ export default async function Page() {
 								</p>
 
 								<button className="mt-8 px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-[#002A28] transition-all">
-									View Profile
+									<Link href="/administration/director">View Profile</Link>
 								</button>
 							</div>
 						</div>
@@ -179,7 +184,7 @@ export default async function Page() {
 				</section>
 
 				{/* --- SECTION 5: ADMISSION --- */}
-				<section className="py-20 bg-[#013A33] px-4">
+				<section className="py-20 bg-[#013A33] px-4 max-w-7xl mx-auto">
 					<h2 className="mb-4 text-5xl font-bold text-center text-white">Admission</h2>
 					<div className="w-24 h-1 bg-[#00FFCC] mx-auto mb-10 rounded-full"></div>
 					<AdmissionTabs
@@ -201,7 +206,7 @@ export default async function Page() {
 									<div className="relative h-80 rounded-2xl overflow-hidden shadow-lg transform transition duration-500 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,255,204,0.2)]">
 										<div
 											className="absolute inset-0 transition-transform duration-700 bg-center bg-cover group-hover:scale-110"
-											style={{ backgroundImage: `url('/photo/aboutnit.jpg')` }}
+											style={{ backgroundImage: `url(${aboutImg})` }}
 										></div>
 
 										<div className="absolute inset-0 bg-gradient-to-t from-[#001D1B] via-[#001D1B]/70 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
@@ -218,6 +223,92 @@ export default async function Page() {
 										<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00FFCC] to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
 									</div>
 								</Link>
+							))}
+						</div>
+					</div>
+				</section>
+
+				{/* --- PLACEMENT COMPANIES MARQUEE --- */}
+				<div className="bg-[#002A28] py-4 border-y border-[#006A58] overflow-hidden sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+					<div className="flex gap-16 whitespace-nowrap animate-marquee">
+						{placementCompanies.map((co, i) => (
+							<span key={i} className="text-3xl font-black text-white tracking-tighter">{co}</span>
+						))}
+						{/* Duplicate for seamless loop */}
+						{placementCompanies.map((co, i) => (
+							<span key={`dup-${i}`} className="text-3xl font-black text-white tracking-tighter">{co}</span>
+						))}
+						{placementCompanies.map((co, i) => (
+							<span key={`dup-${i}`} className="text-3xl font-black text-white tracking-tighter">{co}</span>
+						))}
+					</div>
+				</div>
+
+				{/* --- PLACEMENT STUDENT CARDS --- */}
+				<section className="py-24 bg-[#013A33] overflow-hidden border-t border-[#006A58]/20">
+					<div className="max-w-7xl mx-auto px-4 mb-20 text-center">
+						<h2 className="mb-16 text-5xl font-bold text-center text-white">Placements</h2>
+					</div>
+
+					<div className="marquee-container">
+						<div className="marquee-track my-10">
+							{[...placementStudents, ...placementStudents].map((student, idx) => (
+								<div key={idx} className="marquee-card mx-6">
+									<div className="group w-[420px] bg-[#002A28] rounded-[3rem] overflow-hidden border border-[#006A58]/40 hover:border-[#00FFCC]/60 relative transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
+
+										{/* Image Container with Avant-Garde Overlays */}
+										<div className="relative h-72 w-full overflow-hidden">
+											{student.image && (
+												<Image
+													src={student.image}
+													alt={student.name}
+													fill
+													className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
+													sizes="420px"
+													unoptimized={process.env.NODE_ENV === 'development'}
+												/>
+											)}
+											<div className="absolute inset-0 bg-gradient-to-t from-[#002A28] via-transparent to-transparent" />
+
+											{/* Placement Badge */}
+											<div className="absolute top-8 right-8 bg-[#00FFCC] text-[#002A28] text-[12px] font-bold px-5 py-2 rounded-full uppercase tracking-[0.2em] shadow-xl z-20">
+												{student.badge}
+											</div>
+										</div>
+
+										{/* Content Section */}
+										<div className="p-10 pt-8 relative -mt-10 bg-[#002A28] rounded-t-[3.5rem] border-t border-[#006A58]/50">
+											<div className="flex items-center gap-3 mb-6">
+												<span className="text-[#00FFCC] font-mono text-s font-bold px-3 py-1 rounded border border-[#00FFCC]/20 bg-[#00FFCC]/5">
+													{student.company}
+												</span>
+												<span className="h-[1px] flex-grow bg-[#006A58]/50" />
+											</div>
+
+											{/* FIXED HEIGHT HEADER SECTION: Normalizes name and package height */}
+											<div className="min-h-[140px] flex flex-col justify-start">
+												<h3 className="text-4xl font-black text-white mb-2 leading-[1.1] group-hover:text-[#00FFCC] transition-colors break-words">
+													{student.name}
+												</h3>
+												<p className="text-2xl font-light text-gray-400">{student.package}</p>
+											</div>
+
+											<div className="bg-[#013A33] p-6 rounded-2xl border border-[#006A58]/30 mb-8 h-[100px] flex items-center">
+												<p className="text-gray-300 text-sm leading-relaxed line-clamp-2 italic">
+													&quot;{student.desc}&quot;
+												</p>
+											</div>
+
+											<div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+												<span className="">{student.dept}</span>
+												<span className="text-[#00FFCC]">Class of 2024</span>
+											</div>
+										</div>
+
+										{/* Micro-interaction corner element */}
+										<div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-br from-transparent to-[#00FFCC]/10 clip-path-poly group-hover:to-[#00FFCC]/30 transition-all" />
+									</div>
+								</div>
 							))}
 						</div>
 					</div>

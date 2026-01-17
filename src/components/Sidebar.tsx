@@ -8,12 +8,12 @@ interface SidebarLink {
   active?: boolean;
 }
 
-interface AboutSidebarProps {
+interface SidebarProps {
   links: SidebarLink[];
   title?: string;
 }
 
-export function AboutSidebar({ links, title = "Quick Links" }: AboutSidebarProps) {
+export function Sidebar({ links, title = "Quick Links" }: SidebarProps) {
   return (
     <aside className="w-full lg:w-[35%] order-1 lg:order-2">
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm sticky top-32 overflow-hidden">
