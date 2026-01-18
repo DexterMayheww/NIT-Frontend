@@ -20,7 +20,7 @@ export default async function Page() {
     // 2. Fetch Notice Items
     let notices: Awaited<ReturnType<typeof getNotices>>['data'] = [];
     let total = 0;
-    let debugInfo: any = { drupalDomain: DRUPAL_DOMAIN, endpoint: '/jsonapi/node/notice' };
+    const debugInfo: any = { drupalDomain: DRUPAL_DOMAIN, endpoint: '/jsonapi/node/notice' };
 
     try {
         const result = await getNotices(20, 0);

@@ -25,7 +25,6 @@ export default async function InstituteNewsletterPage() {
         { label: 'NIRF Data', href: '/about/nirf-data' },
     ];
 
-    // The latest newsletter is typically the first one in the array
     const newsletters = data.files || [];
     const latestNewsletter = newsletters[0];
     const archives = newsletters.slice(1);

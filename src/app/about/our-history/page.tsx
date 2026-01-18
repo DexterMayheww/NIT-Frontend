@@ -15,20 +15,9 @@ interface HistorySection {
   records: HistoryRecord[];
 }
 
-/**
- * Parses the Drupal field_editor HTML structure:
- * <h1>Section Title</h1>
- * <ol>
- *   <li>Name
- *     <ul><li>Term: ...</li></ul>
- *   </li>
- * </ol>
- */
 function parseHistoryContent(html: string): HistorySection[] {
   if (typeof window !== 'undefined' || !html) return [];
 
-  // Use a simple split and regex approach to parse the specific 
-  // structure requested from the Drupal Editor
   const sections: HistorySection[] = [];
   const sectionParts = html.split(/<h1[^>]*>/i).filter(Boolean);
 
@@ -42,14 +31,10 @@ function parseHistoryContent(html: string): HistorySection[] {
 
     if (liMatches) {
       liMatches.forEach((liContent) => {
-        // Only process the parent LIs (names), skip the nested ones (terms)
-        // by checking if it contains the nested UL pattern
         if (liContent.toLowerCase().includes('<ul')) {
-          // Extract Name: Text before the <ul>
           const namePart = liContent.match(/<li[^>]*>([\s\S]*?)<ul/i);
           const name = namePart ? namePart[1].replace(/<\/?[^>]+(>|$)/g, "").trim() : "";
 
-          // Extract Term: Text inside the nested <li>
           const termPart = liContent.match(/<li[^>]*>Term:\s*([\s\S]*?)<\/li>/i);
           const term = termPart ? termPart[1].replace(/<\/?[^>]+(>|$)/g, "").trim() : "";
 

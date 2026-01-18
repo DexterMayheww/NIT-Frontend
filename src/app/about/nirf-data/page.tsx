@@ -6,7 +6,6 @@ import { Footer } from '@/components/Footer';
 import { getDrupalData } from '@/lib/drupal/getDrupalData';
 
 export default async function NirfDataPage() {
-    // Fetch dynamic content from Drupal
     const FILES_ONLY = 'field_files';
 
     const data = await getDrupalData('/about/nirf-data', FILES_ONLY);
@@ -24,7 +23,6 @@ export default async function NirfDataPage() {
         { label: 'NIRF Data', href: '/about/nirf-data', active: true },
     ];
 
-    // Logic to split files into two columns (matching Key Documents style)
     const files = data.files || [];
     const half = Math.ceil(files.length / 2);
     const leftColumnFiles = files.slice(0, half);

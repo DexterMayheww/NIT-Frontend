@@ -23,7 +23,6 @@ export default async function KeyDocumentsPage() {
         { label: 'NIRF Data', href: '/about/nirf-data' },
     ];
 
-    // Logic to split the files into two columns as per the original design (box1 and box2)
     const files = data.files || [];
     const half = Math.ceil(files.length / 2);
     const leftColumnFiles = files.slice(0, half);

@@ -8,9 +8,6 @@ import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
 import { FileText, ChevronRight } from 'lucide-react';
 
-/**
- * Uses node-html-parser to extract links from Drupal's RTE content
- */
 function extractLinksFromHtml(html: string, domain: string) {
   if (!html) return [];
 
@@ -21,7 +18,7 @@ function extractLinksFromHtml(html: string, domain: string) {
 
     if (node.nodeType !== 1) continue; 
 
-    const element = node as any; // Cast to access tagName and querySelector
+    const element = node as any;
     const textContent = element.text.trim().toLowerCase();
 
     const isHeading = /^H[1-6]$/.test(element.tagName);
@@ -49,11 +46,8 @@ function extractLinksFromHtml(html: string, domain: string) {
 export default async function CourseStructurePage() {
   const DRUPAL_DOMAIN = getDrupalDomain();
 
-  // 1. Fetch Main Page Data
   const mainPage = await getNodeByPath('/academics/course-structure');
-  
-  // 2. Fetch Child Nodes (BTech, MTech, MSc, PhD forms)
-  // We assume these children use the 'academics_child' content type per generated.ts
+
   const children = await getChildNodes('/academics/academic-forms', 'academic_course_forms');
 
   if (!mainPage.data || mainPage.status !== 200) {

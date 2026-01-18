@@ -12,26 +12,19 @@ interface FeeSection {
   links: { label: string; url: string }[];
 }
 
-/**
- * Parses the Drupal editor HTML to extract Fee Structure sections
- * Structure expected: <h2>Title</h2> <ul><li><a href="">Label</a></li></ul>
- */
 function parseFeeStructure(html: string, domain: string): FeeSection[] {
   if (!html) return [];
   const root = parse(html);
   const sections: FeeSection[] = [];
 
-  // Find all headings that define a fee category
   const headings = root.querySelectorAll('h1, h2, h3');
 
   headings.forEach((heading) => {
     const title = heading.text.trim();
     const links: { label: string; url: string }[] = [];
 
-    // Look for the immediate next sibling that is a list
     let nextSibling = heading.nextElementSibling;
-    
-    // Sometimes there are empty p tags or text nodes in between
+
     while (nextSibling && nextSibling.tagName !== 'UL' && !['H1', 'H2', 'H3'].includes(nextSibling.tagName)) {
       nextSibling = nextSibling.nextElementSibling;
     }

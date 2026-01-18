@@ -7,23 +7,16 @@ import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
 
-/**
- * Normalizes the table HTML using node-html-parser
- * - Ensures relative links point to Drupal domain
- * - Cleans up empty tags
- */
 function processOrdinanceTable(html: string, domain: string) {
   if (!html) return '';
   const root = parse(html);
 
-  // Normalize all links
   const links = root.querySelectorAll('a');
   links.forEach((a) => {
     const href = a.getAttribute('href');
     if (href && href.startsWith('/')) {
       a.setAttribute('href', `${domain}${href}`);
     }
-    // Force bold styling from original design
     a.setAttribute('style', 'font-weight: bold; color: #013a33;');
   });
 
@@ -67,7 +60,6 @@ export default async function OrdinancePage() {
                 </h1>
               </div>
 
-              {/* Table Container with custom CSS for odd/even child logic */}
               <div className="overflow-x-auto">
                 <article
                   className="prose prose-lg max-w-none

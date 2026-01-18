@@ -37,7 +37,7 @@ export default async function CentralLibraryPage() {
         >
           <div className="absolute inset-0 bg-[#013a33]/60 backdrop-blur-[1px]"></div>
           <div className="container mx-auto px-4 relative z-10">
-            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
+            <h1 className="text-4xl md:text-5xl font-black text-red-500 uppercase tracking-tighter">
               Department of Library
             </h1>
           </div>

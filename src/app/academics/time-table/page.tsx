@@ -7,11 +7,6 @@ import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
 
-/**
- * Normalizes table HTML from Drupal:
- * - Prepends Drupal Domain to links
- * - Ensures Bootstrap-like table classes and shadows
- */
 function processTimeTable(html: string, domain: string) {
   if (!html) return '';
   const root = parse(html);
@@ -22,7 +17,6 @@ function processTimeTable(html: string, domain: string) {
     if (href && href.startsWith('/')) {
       a.setAttribute('href', `${domain}${href}`);
     }
-    // Maintain the specific link hover style from static HTML
     a.setAttribute('class', 'text-black font-bold no-underline hover:underline hover:text-green-700 transition-colors');
   });
 

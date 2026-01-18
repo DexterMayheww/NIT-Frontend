@@ -5,7 +5,7 @@ import { getDrupalDomain } from '@/lib/drupal/customFetch';
 import { notFound } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
-import { parse } from 'node-html-parser'; // 1. Import the parser
+import { parse } from 'node-html-parser';
 
 export default async function AcademicCalendarPage() {
   const { data, status } = await getNodeByPath('/academics/academic-calendar');
@@ -27,13 +27,11 @@ export default async function AcademicCalendarPage() {
     { label: 'NEP-2020', href: '/academics/nep-2020' },
   ];
 
-  // 2. Process HTML using node-html-parser
   const processHtml = (htmlString: string) => {
     if (!htmlString) return '';
     
     const root = parse(htmlString);
 
-    // Update Image Sources
     root.querySelectorAll('img').forEach((img) => {
       const src = img.getAttribute('src');
       if (src?.startsWith('/sites')) {
@@ -41,7 +39,6 @@ export default async function AcademicCalendarPage() {
       }
     });
 
-    // Update Anchor Links (for PDF downloads or internal Drupal files)
     root.querySelectorAll('a').forEach((a) => {
       const href = a.getAttribute('href');
       if (href?.startsWith('/sites')) {

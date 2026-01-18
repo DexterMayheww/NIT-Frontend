@@ -17,7 +17,6 @@ export default async function Page() {
 	const IMG_AND_FILES = 'field_images,field_images.field_media_image,field_files';
 	const GALLERY_INCLUDES = 'field_images,field_images.field_media_image,field_videos,field_videos.field_media_video_file';
 
-	// 1. Fetch all dynamic sections
 	const [
 		homeData,
 		visionMission,
@@ -47,7 +46,6 @@ export default async function Page() {
 		link: dept.path || `/department/${dept.title.toLowerCase().replace(/\s+/g, '-')}`,
 	}));
 
-	// Data Extraction from Multiple Editors
 	const quickLinks = homeData?.editors?.[0] ? parseQuickLinks(homeData.editors[0]) : [];
 	const placementCompanies = homeData?.editors?.[1] ? parseCompanyMarquee(homeData.editors[1]) : [];
 	const placementStudents = homeData?.editors?.[2] ? parsePlacementTable(homeData.editors[2]) : [];
@@ -68,7 +66,6 @@ export default async function Page() {
 						<source src={homeVideo} type="video/mp4" />
 					</video>
 
-					{/* Gradient Overlay at bottom */}
 					<div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#013A33] to-transparent z-0"></div>
 				</section>
 
@@ -234,7 +231,6 @@ export default async function Page() {
 						{placementCompanies.map((co, i) => (
 							<span key={i} className="text-3xl font-black text-white tracking-tighter">{co}</span>
 						))}
-						{/* Duplicate for seamless loop */}
 						{placementCompanies.map((co, i) => (
 							<span key={`dup-${i}`} className="text-3xl font-black text-white tracking-tighter">{co}</span>
 						))}
@@ -256,7 +252,6 @@ export default async function Page() {
 								<div key={idx} className="marquee-card mx-6">
 									<div className="group w-[420px] bg-[#002A28] rounded-[3rem] overflow-hidden border border-[#006A58]/40 hover:border-[#00FFCC]/60 relative transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
 
-										{/* Image Container with Avant-Garde Overlays */}
 										<div className="relative h-72 w-full overflow-hidden">
 											{student.image && (
 												<Image
@@ -285,7 +280,6 @@ export default async function Page() {
 												<span className="h-[1px] flex-grow bg-[#006A58]/50" />
 											</div>
 
-											{/* FIXED HEIGHT HEADER SECTION: Normalizes name and package height */}
 											<div className="min-h-[140px] flex flex-col justify-start">
 												<h3 className="text-4xl font-black text-white mb-2 leading-[1.1] group-hover:text-[#00FFCC] transition-colors break-words">
 													{student.name}
@@ -341,8 +335,8 @@ export default async function Page() {
 				{/* --- SECTION 8: STATS BUBBLES --- */}
 				{homeData && <StatsSection stats={homeData.stats} />}
 
-				{/* --- SECTION 9: FOOTER --- */}
 			</main>
+			{/* --- SECTION 9: FOOTER --- */}
 			<Footer />
 		</>
 	);

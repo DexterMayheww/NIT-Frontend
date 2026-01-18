@@ -7,6 +7,7 @@ import { Calendar } from "@/components/Calendar";
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -31,7 +32,10 @@ function AcademicCalendar() {
 
 // --- NOTICE BOARD COMPONENT ---
 export function NoticeBoard() {
+    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState('p1');
+
+    const isAdmin = (session?.user as any)?.role === 'administrator';
 
     const tabs = [
         { id: 'p1', label: 'News Board', icon: '/photo/information-button 1.svg' },
@@ -42,11 +46,14 @@ export function NoticeBoard() {
         { id: 'p6', label: 'Office orders & Circulars', icon: '/photo/information-button 6.svg' },
     ];
 
+    // Filter out 'p6' if the user is not an administrator
+    const visibleTabs = tabs.filter(tab => tab.id !== 'p6' || isAdmin);
+
     return (
         <div className="flex flex-col lg:flex-row gap-6 w-full h-full text-white">
             {/* Left Side: Tabs */}
             <div className="w-full lg:w-1/5 flex flex-col gap-3">
-                {tabs.map((tab) => (
+                {visibleTabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
@@ -57,7 +64,7 @@ export function NoticeBoard() {
                                 : 'bg-[#013A33] border-[#006A58] hover:bg-[#004e42]'}
                         `}
                     >
-                        <img src={tab.icon} alt="icon" className="w-6 h-6 invert" />
+                        <Image src={tab.icon} alt="icon" width={24} height={24} className="w-6 h-6 invert" />
                         <span className="font-bold text-sm tracking-wide">{tab.label}</span>
                     </button>
                 ))}
@@ -69,13 +76,10 @@ export function NoticeBoard() {
                     {activeTab === 'p1' && (
                         <p className="text-lg font-light leading-relaxed text-justify">
                             NIT Manipur is one of the ten new National Institutes of Technology established by the Government of India in 2010...
-                            <br /><br />
-                            The institute focuses on producing skilled engineers...
                         </p>
                     )}
                     {activeTab === 'p2' && <p className="text-lg">Latest Academic Notices will appear here.</p>}
                     
-                    {/* UPDATED: Integrated Calendar into p3 */}
                     {activeTab === 'p3' && (
                         <div className="flex flex-col h-full overflow-hidden">
                             <h2 className="text-xl font-bold mb-4 text-[#00FFCC]">Event Calendar</h2>
@@ -85,7 +89,11 @@ export function NoticeBoard() {
                     
                     {activeTab === 'p4' && <p className="text-lg">Active Tenders and procurements.</p>}
                     {activeTab === 'p5' && <p className="text-lg">Current Job Vacancies.</p>}
-                    {activeTab === 'p6' && <p className="text-lg">Official circulars for staff and students.</p>}
+                    
+                    {/* Only render content if admin */}
+                    {activeTab === 'p6' && isAdmin && (
+                        <p className="text-lg">Official circulars for staff and students.</p>
+                    )}
                 </div>
             </div>
         </div>
@@ -140,52 +148,4 @@ export function AdmissionTabs({ btech, mtech, msc, phd }: AdmissionTabsProps) {
             </div>
         </div>
     );
-}
-
-export function PlacementSection() {
-  return (
-    <section className="py-20 bg-[#002A28] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 mb-12">
-        <h2 className="text-5xl font-bold text-center text-white mb-4">Our Placements</h2>
-        <div className="w-24 h-1 bg-[#00FFCC] mx-auto rounded-full"></div>
-      </div>
-
-      <div className="flex overflow-x-auto gap-8 px-8 pb-10 scrollbar-hide snap-x snap-mandatory">
-        {placements.map((student, idx) => (
-          <Link 
-            key={idx} 
-            href={`/placement-details?student=${student.slug}`}
-            className="group min-w-[300px] md:min-w-[350px] bg-[#013A33] rounded-3xl overflow-hidden border border-[#006A58] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,255,204,0.1)] snap-center"
-          >
-            <div className="relative h-64 w-full overflow-hidden">
-              <Image
-                src={student.image}
-                alt={student.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute top-4 right-4 bg-[#00FFCC] text-[#002A28] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                {student.badge}
-              </div>
-            </div>
-
-            <div className="p-6">
-              <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-[#00FFCC] transition-colors">
-                {student.name}
-              </h3>
-              <p className="text-[#00FFCC] font-semibold text-sm mb-3">
-                {student.company} • {student.package}
-              </p>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-2">
-                {student.desc}
-              </p>
-              <div className="pt-4 border-t border-[#006A58] text-xs text-gray-400 font-medium">
-                {student.dept}
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
 }

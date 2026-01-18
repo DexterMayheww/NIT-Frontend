@@ -1,5 +1,5 @@
 import DrupalPage from '@/components/DrupalPage';
 
 export default async function Page() {
-    return <DrupalPage slug={['academics', 'academic-form', 'btech']} />;
+    return <DrupalPage slug={['academics', 'academic-forms', 'btech']} />;
 }

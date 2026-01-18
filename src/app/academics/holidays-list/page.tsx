@@ -7,10 +7,6 @@ import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
 
-/**
- * Extracts links from the Drupal RTE to render them in the 
- * specific "Institutional Box" style.
- */
 function extractHolidayLinks(html: string, domain: string) {
   if (!html) return [];
   const root = parse(html);
@@ -68,7 +64,6 @@ export default async function HolidaysListPage() {
                   <ul className="space-y-4">
                     {holidayLinks.map((link, idx) => (
                       <li key={idx} className="relative pl-12 py-2 group">
-                        {/* Circle Arrow Icon matching style.css logic */}
                         <span className="absolute left-0 top-1/2 -translate-y-1/2 text-[#013a33] text-2xl leading-none transition-transform group-hover:translate-x-1">
                           ➤
                         </span>

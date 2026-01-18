@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { notFound, usePathname } from 'next/navigation';
 import { useSession, signOut } from "next-auth/react";
 import { getDrupalDomain } from '@/lib/drupal/customFetch';
 import {
@@ -14,8 +14,11 @@ import {
     X,
     Mail,
     Phone,
-    ChevronDown
+    ChevronDown,
+    LayoutDashboard,
+    LogOut
 } from 'lucide-react';
+import { getDrupalData } from '@/lib/drupal/getDrupalData';
 
 function SubMenuItem({ child }: { child: any }) {
     const [openLeft, setOpenLeft] = useState(false);
@@ -87,6 +90,19 @@ export default function Navbar() {
     const DRUPAL_DOMAIN = getDrupalDomain();
     const { data: session } = useSession();
     const synth = useRef<SpeechSynthesis | null>(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close profile dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+                setIsProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // 1. Inversion Logic with Media Protection
     useEffect(() => {
@@ -403,19 +419,14 @@ export default function Navbar() {
                     }`}>
 
                     <Link href="/" className="flex items-center gap-4 group no-invert">
-                        <div className="relative overflow-hidden rounded-full bg-white p-1">
                             <Image
-                                src={`${DRUPAL_DOMAIN}/sites/default/files/nitm_logo_0.png`}
+                                src={`${DRUPAL_DOMAIN}/sites/default/files/2026-01/nitm_logo.png`}
                                 alt="NITM Logo"
                                 width={45}
                                 height={45}
-                                className="w-10 h-10 object-contain"
+                                className="w-50 object-contain"
+                                unoptimized={process.env.NODE_ENV === 'development'}
                             />
-                        </div>
-                        <div className="hidden lg:block leading-none">
-                            <span className="text-white font-black text-xl tracking-tighter block uppercase">NIT Manipur</span>
-                            <span className="text-[#00FFCC] text-[9px] font-bold tracking-[0.3em] uppercase">Institute of Excellence</span>
-                        </div>
                     </Link>
 
                     {/* DESKTOP HOVER DROPDOWNS */}
@@ -451,16 +462,55 @@ export default function Navbar() {
                     <div className="flex items-center gap-4">
                         <button className="p-2 text-gray-300 hover:text-[#00FFCC] transition-colors"><Search size={18} /></button>
                         {session ? (
-                            <div className="flex items-center gap-3 pl-2">
-                                <span className="hidden lg:block text-[10px] font-bold uppercase tracking-wider text-white">
-                                    {session.user?.name || (session.user as any)?.email}
-                                </span>
+                            <div className="relative" ref={profileDropdownRef}>
+                                {/* Profile Trigger */}
                                 <button
-                                    onClick={() => signOut()}
-                                    className="bg-red-500/10 text-red-400 border border-red-500/20 px-4 h-9 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all backdrop-blur-sm"
+                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                    className="flex items-center gap-3 pl-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all group"
                                 >
-                                    Sign Out
+                                    <div className="flex flex-col items-end hidden md:flex">
+                                        <span className="text-[9px] font-black uppercase tracking-wider text-[#00FFCC]">
+                                            {session.user?.name || 'User Account'}
+                                        </span>
+                                        <span className="text-[8px] text-gray-400 uppercase font-bold">Profile Settings</span>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-[#00FFCC]/20 border border-[#00FFCC]/40 flex items-center justify-center text-[#00FFCC] group-hover:scale-105 transition-transform">
+                                        <ChevronDown size={14} className={`transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                    </div>
                                 </button>
+
+                                {/* Dropdown Menu */}
+                                {isProfileOpen && (
+                                    <div className="absolute right-0 mt-3 w-60 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="px-4 py-3 border-b border-white/5 mb-1">
+                                            <p className="text-[8px] text-gray-500 uppercase tracking-widest font-black">Logged in as</p>
+                                            <p className="text-[11px] text-[#00FFCC] truncate font-bold">{session.user?.email}</p>
+                                        </div>
+
+                                        {/* BACKEND LINK */}
+                                        <Link 
+                                            href={`${DRUPAL_DOMAIN}/admin/content`} 
+                                            onClick={() => setIsProfileOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
+                                        >
+                                            <LayoutDashboard size={14} />
+                                            Go to Dashboard
+                                        </Link>
+
+                                        <div className="h-px bg-white/5 my-1" />
+
+                                        <button
+                                            onClick={() => {
+                                                setIsProfileOpen(false);
+                                                signOut();
+                                            }}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/10 transition-all"
+                                        >
+                                            <LogOut size={14} />
+                                            Sign Out
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <Link href="/login">

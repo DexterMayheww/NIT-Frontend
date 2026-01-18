@@ -6,8 +6,8 @@ import { Footer } from '@/components/Footer';
 import Image from 'next/image';
 import { Phone, Mail } from 'lucide-react';
 import { getDrupalData } from '@/lib/drupal/getDrupalData';
-import { getDrupalDomain } from '@/lib/drupal/customFetch'; // Import domain helper
-import { parse } from 'node-html-parser'; // 1. Import the parser
+import { getDrupalDomain } from '@/lib/drupal/customFetch';
+import { parse } from 'node-html-parser';
 
 export default async function AcademicCellPage() {
     const IMG_ONLY = 'field_images,field_images.field_media_image';
@@ -30,12 +30,10 @@ export default async function AcademicCellPage() {
     { label: 'NEP-2020', href: '/academics/nep-2020' },
   ];
 
-  // 2. Logic to process HTML using node-html-parser
   const processHtml = (htmlString: string) => {
     if (!htmlString) return '';
     const root = parse(htmlString);
 
-    // Fix Image paths in table if any
     root.querySelectorAll('img').forEach((img) => {
       const src = img.getAttribute('src');
       if (src?.startsWith('/sites')) {
@@ -43,7 +41,6 @@ export default async function AcademicCellPage() {
       }
     });
 
-    // Fix Anchor paths (for staff profile PDFs or documents)
     root.querySelectorAll('a').forEach((a) => {
       const href = a.getAttribute('href');
       if (href?.startsWith('/sites')) {
@@ -56,7 +53,6 @@ export default async function AcademicCellPage() {
 
   const processedHtml = processHtml(data.editor || '');
 
-  // Logic to parse field_details for the Dean Card
   const detailsLines = data.details?.split('\n').map(l => l.trim()).filter(Boolean) || [];
   const deanName = detailsLines[0] || 'Dean (Academic Affairs)';
   const deanPhone = detailsLines.find(l => l.toLowerCase().includes('phone'))?.replace(/phone:?/i, '').trim();

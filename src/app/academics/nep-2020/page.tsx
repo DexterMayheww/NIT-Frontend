@@ -5,7 +5,7 @@ import { getDrupalDomain } from '@/lib/drupal/customFetch';
 import { notFound } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
-import { parse } from 'node-html-parser'; // 1. Import the parser
+import { parse } from 'node-html-parser';
 
 export default async function NEP2020Page() {
     const { data, status } = await getNodeByPath('/academics/nep-2020');
@@ -27,13 +27,11 @@ export default async function NEP2020Page() {
         { label: 'NEP-2020', href: '/academics/nep-2020', active: true },
     ];
 
-    // 2. Logic to process HTML with node-html-parser
     const processHtml = (htmlString: string) => {
         if (!htmlString) return '';
         
         const root = parse(htmlString);
 
-        // Fix Image Paths
         root.querySelectorAll('img').forEach((img) => {
             const src = img.getAttribute('src');
             if (src?.startsWith('/sites')) {
@@ -41,7 +39,6 @@ export default async function NEP2020Page() {
             }
         });
 
-        // Fix Link Paths (for PDFs, Documents, etc hosted in Drupal)
         root.querySelectorAll('a').forEach((a) => {
             const href = a.getAttribute('href');
             if (href?.startsWith('/sites')) {

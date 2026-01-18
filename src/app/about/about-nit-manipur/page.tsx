@@ -7,8 +7,6 @@ import { getDrupalData } from '@/lib/drupal/getDrupalData';
 import { Sidebar } from '@/components/Sidebar';
 
 export default async function AboutNITPage() {
-    // Fetch data from Drupal using the decoupled router path
-    // Standard inclusions for images are handled inside getNodeByPath
     const IMG_ONLY = 'field_images,field_images.field_media_image';
 
     const data = await getDrupalData('/about/about-nit-manipur', IMG_ONLY);
@@ -57,10 +55,6 @@ export default async function AboutNITPage() {
 
                         {/* Dynamic Body Content */}
                         <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed space-y-6">
-                            {/* 
-                We use dangerouslySetInnerHTML because field_details 
-                is typically a formatted text area from Drupal 
-            */}
                             {data.details ? (
                                 <div
                                     className="whitespace-pre-line [&>p]:mb-6 [&>p:last-child]:mb-0"

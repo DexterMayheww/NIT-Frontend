@@ -7,26 +7,19 @@ import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
 
-/**
- * Parses the HTML to extract only the section following a "Syllabi" header.
- * Ignores everything before it (like Course Structure).
- */
 function extractSyllabiSection(html: string, domain: string) {
   if (!html) return null;
   const root = parse(html);
-  
-  // 1. Find the header that indicates the Syllabi section
+
   const headers = root.querySelectorAll('h1, h2, h3');
   const syllabiHeader = headers.find(h => h.text.toLowerCase().includes('syllabi'));
 
   if (!syllabiHeader) return null;
 
-  // 2. Collect siblings following the header until the next major header or end of div
   const syllabiContent: string[] = [];
   let nextElem = syllabiHeader.nextElementSibling;
 
   while (nextElem && !['H1', 'H2', 'H3'].includes(nextElem.tagName)) {
-    // Normalize links within this fragment
     nextElem.querySelectorAll('a').forEach(a => {
       const href = a.getAttribute('href');
       if (href && href.startsWith('/')) {
@@ -45,7 +38,6 @@ function extractSyllabiSection(html: string, domain: string) {
 export default async function SyllabiPage() {
   const DRUPAL_DOMAIN = getDrupalDomain();
 
-  // 1. Fetch Main Page and Child nodes (BTech, MTech, etc.)
   const [mainPage, children] = await Promise.all([
     getNodeByPath('/academics/syllabi'),
     getChildNodes('/academics/academic-forms', 'academic_course_forms')

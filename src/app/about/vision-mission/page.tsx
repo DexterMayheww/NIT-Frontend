@@ -7,7 +7,6 @@ import { Footer } from '@/components/Footer';
 import { Sidebar } from '@/components/Sidebar';
 
 export default async function VisionMissionPage() {
-    // Fetch dynamic content from Drupal
     const { data, status } = await getNodeByPath('/about/vision-mission');
 
     if (!data || status !== 200) {
