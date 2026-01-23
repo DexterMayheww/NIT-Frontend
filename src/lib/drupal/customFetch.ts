@@ -25,6 +25,11 @@ export async function drupalFetch<T>(
 		url = `${DRUPAL_DOMAIN}${normalizedEndpoint}`;
 	}
 
+	// Double-check: If this is the router URL, we want to know why
+	if (url.includes('/router/translate-path')) {
+		console.log(`[Drupal Fetch] CALLING DECOUPLED ROUTER: ${url}`);
+	}
+
 	if (params) {
 		const searchParams = new URLSearchParams();
 		Object.entries(params).forEach(([key, value]) => {
@@ -85,7 +90,35 @@ export async function fetchByPath<T>(
 	options: FetchOptions = {}
 ): Promise<{ data: T; status: number; headers: Headers } | null> {
 	try {
+		// 1. Guard: Check for system/browser paths that should never hit Drupal
+		const isSystemPath = 
+			path.includes('.well-known') || 
+			path.endsWith('.json') || 
+			path.endsWith('.ico') || 
+			path.endsWith('.txt') ||
+			path.startsWith('/_next');
+
+		if (isSystemPath && !path.startsWith('/jsonapi')) {
+			console.log(`[fetchByPath] Skipping translation for system path: ${path}`);
+			return null;
+		}
+
+		// If path is a full URL, handle it directly via drupalFetch
+		if (path.startsWith('http')) {
+			console.log(`[fetchByPath] Detected full URL, bypassing router: ${path}`);
+			return await drupalFetch<T>(path, options);
+		}
+
 		const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
+		// NEW: If the path is already a direct JSON:API path, skip translation
+		// Using a more inclusive check for any /jsonapi usage
+		if (cleanPath.startsWith('/jsonapi')) {
+			console.log(`[fetchByPath] Detected JSON:API path, bypassing router: ${cleanPath}`);
+			return await drupalFetch<T>(cleanPath, options);
+		}
+
+		console.log(`[fetchByPath] Translating path: ${cleanPath}`);
 
 		// 1. RESOLVE: Hit the Decoupled Router
 		const routerUrl = `/router/translate-path?path=${encodeURIComponent(cleanPath)}`;

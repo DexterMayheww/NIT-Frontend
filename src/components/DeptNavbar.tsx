@@ -10,9 +10,9 @@ const deptLinks = [
     label: 'People', 
     href: '#',
     children: [
-      { label: 'Faculty', href: '/department/civil-engineering/faculty' },
-      { label: 'Staff', href: '/department/civil-engineering/staff' },
-      { label: 'Students', href: '/department/civil-engineering/students' },
+      { label: 'Faculty', href: '/department/civil-engineering/people/faculty' },
+      { label: 'Staff', href: '/department/civil-engineering/people/staff' },
+      { label: 'Students', href: '/department/civil-engineering/people/students' },
     ]
   },
   { 
