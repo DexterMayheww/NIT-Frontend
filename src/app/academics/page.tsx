@@ -1,10 +1,5 @@
-// app/test/page.tsx
-'use client'
-import { useSession, signIn } from "next-auth/react"
+import DrupalPage from '@/components/DrupalPage';
 
-export default function Test() {
-  const { data: session } = useSession()
-  if (!session) return <button onClick={() => signIn("drupal")}>Login</button>
-  
-  return <pre className="mt-24">{JSON.stringify(session.user, null, 2)}</pre>
+export default async function Page() {
+    return <DrupalPage slug={['administration']} />;
 }

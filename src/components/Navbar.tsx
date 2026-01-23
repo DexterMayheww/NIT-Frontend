@@ -19,6 +19,7 @@ import {
     LogOut
 } from 'lucide-react';
 import { getDrupalData } from '@/lib/drupal/getDrupalData';
+import { DeptNavbar } from './DeptNavbar';
 
 function SubMenuItem({ child }: { child: any }) {
     const [openLeft, setOpenLeft] = useState(false);
@@ -43,7 +44,7 @@ function SubMenuItem({ child }: { child: any }) {
         >
             <Link
                 href={child.href}
-                className="flex items-center justify-between text-[12px] font-bold text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 px-3 py-2.5 rounded-lg transition-all"
+                className="flex items-center justify-between text-[12px] font-medium text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 px-3 py-2.5 rounded-lg transition-all"
             >
                 {child.label}
                 {child.children && (
@@ -92,6 +93,8 @@ export default function Navbar() {
     const synth = useRef<SpeechSynthesis | null>(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+    const isDeptPage = pathname.startsWith('/department/') && pathname !== '/department';
 
     // Close profile dropdown when clicking outside
     useEffect(() => {
@@ -233,10 +236,10 @@ export default function Navbar() {
                     label: 'Forms',
                     href: '/academics/academic-forms',
                     children: [
-                        { label: 'BTech', href: '/academics/academic-form/btech' },
-                        { label: 'MTech', href: '/academics/academic-form/mtech' },
-                        { label: 'MSc', href: '/academics/academic-form/msc' },
-                        { label: 'PhD', href: '/academics/academic-form/phd' },
+                        { label: 'BTech', href: '/academics/academic-forms/btech' },
+                        { label: 'MTech', href: '/academics/academic-forms/mtech' },
+                        { label: 'MSc', href: '/academics/academic-forms/msc' },
+                        { label: 'PhD', href: '/academics/academic-forms/phd' },
                     ]
                 },
                 { label: 'Library', href: '/academics/library' },
@@ -319,7 +322,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${mounted && scrolled ? '-translate-y-[40px]' : 'translate-y-0'}`}>
+            <nav className={`fixed top-0 left-0 w-full z-[110] transition-all duration-500 ${mounted && scrolled ? '-translate-y-[40px]' : 'translate-y-0'}`}>
 
                 {/* UTILITY BAR */}
                 <div className="bg-[#002A28] border-b border-white/5 h-[40px] flex items-center justify-between px-6 md:px-12">
@@ -413,9 +416,9 @@ export default function Navbar() {
                 </div>
 
                 {/* MAIN BAR */}
-                <div className={`w-full px-6 md:px-12 flex items-center justify-between transition-all duration-500 border-b ${mounted && scrolled
-                        ? 'bg-[#013A33]/95 backdrop-blur-xl py-3 border-[#00FFCC]/20'
-                        : 'bg-[#013A33]/60 py-6 border-transparent'
+                <div className={`relative w-full px-6 md:px-12 flex py-3 items-center justify-between transition-all duration-500 border-b z-[110] ${mounted && scrolled
+                        ? 'bg-[#013A33]/95 backdrop-blur-xl border-[#00FFCC]/20'
+                        : 'bg-[#013A33]/60 border-transparent'
                     }`}>
 
                     <Link href="/" className="flex items-center gap-4 group no-invert">
@@ -430,13 +433,13 @@ export default function Navbar() {
                     </Link>
 
                     {/* DESKTOP HOVER DROPDOWNS */}
-                    <div className="hidden xl:flex items-center h-full">
+                    <div className="hidden xl:flex items-center h-full z-[110]">
                         <ul className="flex items-center gap-8 h-full">
                             {navItems.map((item) => (
                                 <li key={item.label} className="relative group h-full flex items-center">
                                     <Link
                                         href={item.href}
-                                        className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${pathname === item.href ? 'text-[#00FFCC]' : 'text-gray-200 hover:text-white'
+                                        className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${pathname === item.href ? 'text-[#00FFCC]' : 'text-gray-200 hover:text-white'
                                             }`}
                                     >
                                         {item.label}
@@ -444,7 +447,7 @@ export default function Navbar() {
                                     </Link>
 
                                     {item.children && (
-                                        <div className="absolute top-full left-0 w-64 pt-4 transition-all duration-300 cubic-bezier opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
+                                        <div className="absolute top-full left-0 w-64 pt-4 transition-all duration-300 cubic-bezier opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 z-[110]">
                                             <div className="bg-[#002A28]/95 backdrop-blur-2xl border border-white/10 rounded-xl p-2 shadow-2xl">
                                                 <div className="flex flex-col gap-1">
                                                     {item.children.map((child) => (
@@ -524,6 +527,12 @@ export default function Navbar() {
                         </button>
                     </div>
                 </div>
+                {/* SECONDARY DEPARTMENT NAVBAR */}
+                {isDeptPage && (
+                    <div className="animate-in fade-in slide-in-from-top-1 duration-500 z-[100]">
+                        <DeptNavbar scrolled={scrolled} mounted={mounted} />
+                    </div>
+                )}
             </nav>
         </>
     );

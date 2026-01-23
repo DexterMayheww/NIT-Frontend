@@ -1,7 +1,7 @@
 'use client';
 
 import { SessionProvider } from "next-auth/react";
-import { SnackProvider } from "@/app/SnackProvider";
+import { SnackProvider } from "@/app/provider-pages/SnackProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (

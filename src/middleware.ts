@@ -23,9 +23,9 @@ export async function middleware(req: NextRequest) {
   // 2. OTP ENFORCEMENT (THE JAIL):
   // If user is logged in but NOT verified, and they are NOT on the OTP page,
   // force them to the OTP page.
-  if (isAuth && !isVerified && !isOtpPage) {
-    return NextResponse.redirect(new URL("/verify-phone", req.url));
-  }
+  // if (isAuth && !isVerified && !isOtpPage) {
+  //   return NextResponse.redirect(new URL("/verify-phone", req.url));
+  // }
 
   // 3. OTP CLEANUP:
   // If user is logged in AND verified, but they try to go back to the OTP page,

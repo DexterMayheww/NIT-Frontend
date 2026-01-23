@@ -1,5 +1,5 @@
 // app/page.tsx
-import { getDepartments } from '@/lib/drupal/generated';
+import { getDepartments, getNotices } from '@/lib/drupal/generated';
 import { NoticeBoard, AdmissionTabs } from '@/components/HomeClient';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -15,10 +15,12 @@ export default async function Page() {
 	const IMG_ONLY = 'field_images,field_images.field_media_image';
 	const VID_ONLY = 'field_videos,field_videos.field_media_video_file';
 	const IMG_AND_FILES = 'field_images,field_images.field_media_image,field_files';
+	const FILES_ONLY = 'field_files';
 	const GALLERY_INCLUDES = 'field_images,field_images.field_media_image,field_videos,field_videos.field_media_video_file';
 
 	const [
 		homeData,
+		newsBoardData,
 		visionMission,
 		aboutNit,
 		director,
@@ -27,9 +29,11 @@ export default async function Page() {
 		msc,
 		phd,
 		gallery,
-		departmentsRes
+		departmentsRes,
+		noticesRes
 	] = await Promise.all([
 		getDrupalData('/home', VID_ONLY),
+		getDrupalData('/news-board', FILES_ONLY),
 		getDrupalData('/about/vision-mission', IMG_ONLY),
 		getDrupalData('/about/about-nit-manipur', IMG_ONLY),
 		getDrupalData('/administration/director', IMG_ONLY),
@@ -39,6 +43,7 @@ export default async function Page() {
 		getDrupalData('/academics/academic-forms/phd', IMG_AND_FILES),
 		getDrupalData('/gallery', GALLERY_INCLUDES),
 		getDepartments(),
+		getNotices(6, 0),
 	]);
 
 	const departments = departmentsRes.data.map((dept) => ({
@@ -54,6 +59,8 @@ export default async function Page() {
 	const homeVideo = homeData?.videos?.[0]?.url || '/vid/nitDrone.mp4';
 	const directorImg = director?.images?.[0]?.url || '/photo/nitDirector.png';
 	const aboutImg = aboutNit?.images?.[0]?.url || '/photo/aboutNit.png';
+
+	
 
 	return (
 		<>
@@ -88,7 +95,7 @@ export default async function Page() {
 
 
 				<section className='m-12'>
-					<NoticeBoard />
+					<NoticeBoard notices={noticesRes.data as any} newsFiles={newsBoardData?.files} />
 				</section>
 
 

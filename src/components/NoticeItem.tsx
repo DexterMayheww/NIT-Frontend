@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { getDrupalDomain } from '@/lib/drupal/customFetch';
 
 interface NoticeProps {
-    id: string;      // UUID
-    nid?: number;    // Numeric ID for Drupal Backend (Ensure this is in your data fetch)
+    id: string;      
+    nid?: number;    
     title: string;
     date: string;
     bodyHtml: string;
@@ -43,40 +43,6 @@ export default function NoticeItem({ id, nid, title, date, bodyHtml }: NoticePro
         window.open(editPath, '_blank');
     };
 
-    /**
-     * Requirement 2: Implement Deletion via JSON:API
-     */
-    const handleDelete = async () => {
-        const confirmed = window.confirm(`Are you sure you want to delete: "${title}"?`);
-        if (!confirmed) return;
-
-        setIsDeleting(true);
-
-        try {
-            const response = await fetch(`${DRUPAL_DOMAIN}/jsonapi/node/notice/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/vnd.api+json',
-                    'X-CSRF-Token': csrfToken // Required for Drupal auth
-                },
-            });
-
-            if (response.ok || response.status === 204) {
-                alert("Notice deleted successfully.");
-                router.refresh(); // Triggers Server Component re-fetch
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                console.error("Delete failed:", errorData);
-                alert(`Failed to delete: ${response.statusText}`);
-            }
-        } catch (error) {
-            console.error("Network error during delete:", error);
-            alert("A network error occurred. Check console.");
-        } finally {
-            setIsDeleting(false);
-        }
-    };
-
     const contentClasses = [
         "p-5 pt-0 border-t border-gray-100 text-gray-700 prose max-w-none",
         "[&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800",
@@ -97,13 +63,6 @@ export default function NoticeItem({ id, nid, title, date, bodyHtml }: NoticePro
                         className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1 rounded text-[10px] uppercase tracking-tighter transition-all"
                     >
                         Edit
-                    </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-                        disabled={isDeleting}
-                        className="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1 rounded text-[10px] uppercase tracking-tighter transition-all disabled:opacity-50"
-                    >
-                        {isDeleting ? '...' : 'Delete'}
                     </button>
                 </div>
             )}

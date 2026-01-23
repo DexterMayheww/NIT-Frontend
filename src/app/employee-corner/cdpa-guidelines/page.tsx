@@ -1,13 +1,18 @@
-import { getNodeByPath } from '@/lib/drupal/generated';
+// src/app/employee-corner/cdpa-guidelines/page.tsx
+
 import { getDrupalDomain } from '@/lib/drupal/customFetch';
 import { notFound } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
+import { getDrupalData } from '@/lib/drupal/getDrupalData';
 
 interface DocumentLink {
     title: string;
     href: string;
+    extension: string;
+    isPdf: boolean;
+    isWord: boolean;
 }
 
 interface CPDASection {
@@ -16,22 +21,42 @@ interface CPDASection {
 }
 
 /**
- * PARSER: Groups links by the heading that precedes them
+ * UPDATED PARSER: 
+ * 1. Zips ALL <li> tags found in the HTML with the files array by index
+ * 2. Groups them by the headings (h2/h3) that precede them
  */
-function parseCPDA(html: string, domain: string): CPDASection[] {
+function parseCPDA(html: string, files: { url: string; filename: string }[]): CPDASection[] {
     if (!html) return [];
     const root = parse(html);
-    const sections: CPDASection[] = [];
     
+    // 1. Create a "Pool" of all documents mapped by index (like Basic Approval)
+    const allLis = root.querySelectorAll('li');
+    const documentPool: DocumentLink[] = allLis.map((li, index) => {
+        const file = files[index];
+        if (!file) return null;
+
+        const text = li.text.trim().replace(/^click here for /i, '').replace(/^click here to download /i, '');
+        const extension = file.url.split('.').pop()?.toUpperCase() || 'PDF';
+
+        return {
+            title: text,
+            href: file.url,
+            extension,
+            isPdf: extension === 'PDF',
+            isWord: extension === 'DOCX' || extension === 'DOC'
+        };
+    }).filter((doc): doc is DocumentLink => doc !== null);
+
+    // 2. Traverse and Group by Headings
+    const sections: CPDASection[] = [];
     let currentCategory = "";
     let currentLinks: DocumentLink[] = [];
+    let globalFileIndex = 0;
 
-    // Traverse top-level nodes (h3, h2, ul)
     root.childNodes.forEach((node: any) => {
         const tagName = node.rawTagName?.toLowerCase();
 
         if (tagName === 'h2' || tagName === 'h3') {
-            // If we already have a category, push it before starting new one
             if (currentCategory && currentLinks.length > 0) {
                 sections.push({ category: currentCategory, links: [...currentLinks] });
             }
@@ -39,22 +64,15 @@ function parseCPDA(html: string, domain: string): CPDASection[] {
             currentLinks = [];
         } else if (tagName === 'ul') {
             const listItems = node.querySelectorAll('li');
-            listItems.forEach((li: any) => {
-                const link = li.querySelector('a');
-                if (link) {
-                    let href = link.getAttribute('href') || "#";
-                    if (href.startsWith('/')) href = `${domain}${href}`;
-                    
-                    currentLinks.push({
-                        title: link.text.trim().replace(/^Click here for /i, ''),
-                        href: href
-                    });
+            listItems.forEach(() => {
+                if (documentPool[globalFileIndex]) {
+                    currentLinks.push(documentPool[globalFileIndex]);
+                    globalFileIndex++;
                 }
             });
         }
     });
 
-    // Push the final section
     if (currentCategory && currentLinks.length > 0) {
         sections.push({ category: currentCategory, links: currentLinks });
     }
@@ -63,16 +81,16 @@ function parseCPDA(html: string, domain: string): CPDASection[] {
 }
 
 export default async function CPDAGuidelinesPage() {
-    const DRUPAL_DOMAIN = getDrupalDomain();
-    const { data, status } = await getNodeByPath('/employee-corner/cdpa-guidelines');
+    const INCLUDES = 'field_files';
+    // Using getDrupalData to match the basic-approval-form implementation
+    const data = await getDrupalData('/employee-corner/cdpa-guidelines', INCLUDES);
 
-    if (!data || status !== 200) {
+    if (!data) {
         notFound();
     }
 
-    const sections = parseCPDA(data.editor || "", DRUPAL_DOMAIN);
-
-    
+    // Parse sections using the editor text and the attached files
+    const sections = parseCPDA(data.editor || "", data.files || []);
 
     const employeeLinks = [
         { label: "APAR - Teaching", href: "/employee-corner/apar-formats/teaching" },
@@ -120,7 +138,7 @@ export default async function CPDAGuidelinesPage() {
                                             <span className="text-[#00FFCC] text-sm">0{sIdx + 1}</span>
                                             {section.category}
                                         </h2>
-                                        <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Section {section.category.split(' ')[0]}</span>
+                                        <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Section {sIdx + 1}</span>
                                     </div>
 
                                     <div className={`grid gap-4 ${isAnnexure ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
@@ -137,14 +155,16 @@ export default async function CPDAGuidelinesPage() {
                                                 }`}
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono text-xs ${
-                                                        isForms ? 'bg-[#00FFCC] text-[#002A28]' : 'bg-[#002A28] text-gray-400'
+                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono text-[10px] ${
+                                                        link.isPdf ? 'bg-red-500/20 text-red-400' : 
+                                                        link.isWord ? 'bg-blue-500/20 text-blue-400' : 
+                                                        'bg-[#002A28] text-gray-400'
                                                     }`}>
-                                                        {isAnnexure ? `A${lIdx + 1}` : isForms ? 'F' : 'D'}
+                                                        {link.extension}
                                                     </div>
                                                     <span className={`text-sm font-bold leading-tight ${
                                                         isForms ? 'text-white group-hover:text-[#00FFCC]' : 'text-gray-300 group-hover:text-white'
-                                                    } transition-colors`}>
+                                                    } transition-colors capitalize`}>
                                                         {link.title}
                                                     </span>
                                                 </div>
@@ -168,7 +188,7 @@ export default async function CPDAGuidelinesPage() {
                                 Processing Notice
                             </h4>
                             <p className="text-gray-300 text-xs leading-relaxed font-light">
-                                All CPDA expenditures are subject to the institute's finance committee regulations and MHRD/MoE guidelines. 
+                                All CPDA expenditures are subject to the institute&apos;s finance committee regulations and MHRD/MoE guidelines. 
                                 Claims must be submitted with original invoices and participation certificates. 
                                 For queries regarding the flowchart of activities, please consult the Dean (Faculty Welfare).
                             </p>

@@ -143,8 +143,17 @@ body {
 .marquee-track:has(.marquee-card:hover) {
   animation-play-state: paused;
 }
-
 .marquee-card {
   flex-shrink: 0;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes marqueeUp {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.animate-marquee-up {
+  animation: marqueeUp 20s linear infinite;
+}
+.animate-marquee-up:hover {
+  animation-play-state: paused;
 }

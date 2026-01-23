@@ -56,7 +56,7 @@ export default async function HeadOfDepartmentPage() {
 
   return (
     <>
-      <main className="min-h-screen bg-white pt-32 pb-20 px-4 font-sans">
+      <main className="min-h-screen bg-white pt-40 pb-20 px-4 font-sans">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10">
           
           {/* --- MAIN CONTENT: HOD TABLE --- */}

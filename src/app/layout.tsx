@@ -24,7 +24,7 @@ export default function RootLayout({
           </header>
 
           {/* The {children} prop is where the specific page content is injected */}
-          <main className="mt-10">
+          <main className="">
             {children}
           </main>
         </Providers>

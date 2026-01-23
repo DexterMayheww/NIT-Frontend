@@ -41,3 +41,32 @@ export function parsePlacementTable(html: string) {
     };
   });
 }
+
+export function parseDepartmentEditor(html: string) {
+  const root = parse(html);
+  const sections: { vision: string; mission: string; programs: string } = {
+    vision: '',
+    mission: '',
+    programs: ''
+  };
+
+  const headers = root.querySelectorAll('h1, h2');
+  
+  headers.forEach((header, index) => {
+    const title = header.textContent.trim().toLowerCase();
+    let content = '';
+    let next = header.nextElementSibling;
+
+    // Collect all siblings until the next header
+    while (next && !['H1', 'H2'].includes(next.tagName)) {
+      content += next.outerHTML;
+      next = next.nextElementSibling;
+    }
+
+    if (title.includes('vision')) sections.vision = content;
+    else if (title.includes('mission')) sections.mission = content;
+    else if (title.includes('programs')) sections.programs = content;
+  });
+
+  return sections;
+}

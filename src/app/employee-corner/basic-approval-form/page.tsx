@@ -1,50 +1,59 @@
+// src/app/employee-corner/basic-approval-form/page.tsx
+
 import { getNodeByPath } from '@/lib/drupal/generated';
 import { getDrupalDomain } from '@/lib/drupal/customFetch';
 import { notFound } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { parse } from 'node-html-parser';
+import { getDrupalData } from '@/lib/drupal/getDrupalData';
 
-interface ApprovalLink {
-    title: string;
-    subtext: string;
-    href: string;
+interface BasicApprovalDoc {
+    text: string;
+    url: string;
+    isWord: boolean;
+    isPdf: boolean;
+    extension: string;
 }
 
 /**
- * PARSER: Converts CKEditor list into structured action cards
+ * SYNC PARSER: Maps CKEditor titles to uploaded field_files by index
  */
-function parseApprovalForms(html: string, domain: string): ApprovalLink[] {
-    if (!html) return [];
+function syncApprovalFiles(html: string, files: { url: string; filename: string }[]) {
+    if (!html) return { instruction: "", documents: [] };
     const root = parse(html);
+    
+    // 2. Extract list items as labels
     const listItems = root.querySelectorAll('li');
 
-    return listItems.map(li => {
-        const link = li.querySelector('a');
-        const rawText = link?.text.trim() || li.text.trim();
-        let href = link?.getAttribute('href') || "#";
-        if (href.startsWith('/')) href = `${domain}${href}`;
+    // 3. Zip labels with actual file objects
+    const documents: BasicApprovalDoc[] = listItems.map((li, index) => {
+        const file = files[index];
+        if (!file) return null;
 
-        // Avant-Garde Cleanup: Separate "FORM -" from the actual descriptor
-        const title = rawText.replace(/^FORM\s*-\s*/i, '');
-        
+        const text = li.text.trim().replace(/^click here for /i, '').replace(/^click here to download /i, '');
+        const extension = file.url.split('.').pop()?.toUpperCase() || 'PDF';
+
         return {
-            title: title,
-            subtext: rawText.startsWith('FORM') ? 'Procurement Form' : 'Request Document',
-            href: href
+            text,
+            url: file.url,
+            isWord: text.toLowerCase().includes('word') || extension === 'DOCX' || extension === 'DOC',
+            isPdf: text.toLowerCase().includes('pdf') || extension === 'PDF',
+            extension
         };
-    });
+    }).filter((doc): doc is BasicApprovalDoc => doc !== null);
+
+    return { documents };
 }
 
 export default async function BasicApprovalFormPage() {
     const DRUPAL_DOMAIN = getDrupalDomain();
-    const { data, status } = await getNodeByPath('/employee-corner/basic-approval-form');
+    const INCLUDES = 'field_files';
+    const data = await getDrupalData('/employee-corner/basic-approval-form', INCLUDES);
 
-    if (!data || status !== 200) {
-        notFound();
-    }
+    if (!data) notFound();
 
-    const forms = parseApprovalForms(data.editor || "", DRUPAL_DOMAIN);
+    const { documents } = syncApprovalFiles(data.editor || "", data.files || []);
 
     const employeeLinks = [
         { label: "APAR - Teaching", href: "/employee-corner/apar-formats/teaching" },
@@ -92,40 +101,52 @@ export default async function BasicApprovalFormPage() {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {forms.map((form, idx) => (
+                        <div className="flex flex-col gap-4">
+                            {documents.map((doc, idx) => (
                                 <a 
                                     key={idx}
-                                    href={form.href}
+                                    href={doc.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group relative bg-[#013A33] p-8 rounded-[2.5rem] border border-white/5 hover:border-[#00FFCC]/40 transition-all duration-500 shadow-xl overflow-hidden"
+                                    className="group flex items-center justify-between bg-[#013A33] p-8 rounded-3xl border border-white/5 hover:border-[#00FFCC]/40 transition-all duration-500 hover:-translate-y-1 shadow-xl"
                                 >
-                                    {/* Design Element */}
-                                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
-                                    </div>
-
-                                    <div className="relative z-10">
-                                        <div className="flex items-center gap-2 mb-6">
-                                            <span className="text-[#00FFCC] font-mono text-[9px] uppercase tracking-widest bg-[#00FFCC]/10 px-2 py-0.5 rounded">Official Form</span>
-                                            <span className="text-gray-600 text-[9px] font-mono uppercase tracking-widest">Index: 0{idx + 1}</span>
+                                    <div className="flex items-center gap-8">
+                                        {/* Dynamic Iconography */}
+                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all duration-500 ${
+                                            doc.isPdf ? 'bg-red-500/5 border-red-500/20 group-hover:bg-red-500/20' : 
+                                            doc.isWord ? 'bg-blue-500/5 border-blue-500/20 group-hover:bg-blue-500/20' : 
+                                            'bg-[#002A28] border-white/10 group-hover:border-[#00FFCC]/40'
+                                        }`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-7 w-7 ${
+                                                doc.isPdf ? 'text-red-400' : doc.isWord ? 'text-blue-400' : 'text-[#00FFCC]'
+                                            }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
                                         </div>
                                         
-                                        <h3 className="text-xl font-bold text-white group-hover:text-[#00FFCC] transition-colors leading-tight mb-8 min-h-[3rem]">
-                                            {form.title}
-                                        </h3>
-
-                                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                                            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-widest">Download Asset</span>
-                                            <div className="w-10 h-10 rounded-full bg-[#002A28] flex items-center justify-center text-[#00FFCC] group-hover:bg-[#00FFCC] group-hover:text-[#002A28] transition-all">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                                                </svg>
+                                        <div>
+                                            <h4 className="text-gray-100 font-bold text-xl group-hover:text-[#00FFCC] transition-colors leading-tight capitalize">
+                                                {doc.text}
+                                            </h4>
+                                            <div className="flex items-center gap-3 mt-2">
+                                                <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${
+                                                    doc.isPdf ? 'bg-red-500/20 text-red-400' : 
+                                                    doc.isWord ? 'bg-blue-500/20 text-blue-400' : 
+                                                    'bg-white/10 text-gray-400'
+                                                }`}>
+                                                    {doc.extension}
+                                                </span>
+                                                <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                                                <span className="text-[10px] font-mono text-gray-500 uppercase">Institutional Resource</span>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/5 border border-white/5 group-hover:bg-[#00FFCC] group-hover:text-[#002A28] transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
                                     </div>
                                 </a>
                             ))}
