@@ -1,0 +1,5 @@
+import DepartmentGenericPage from '@/components/DepartmentGenericPage';
+
+export default async function Page() {
+    return <DepartmentGenericPage path="/department/chemistry/dppc" mode="generic" category="Department Committee" deptSlug="chemistry" deptName="Chemistry" />;
+}

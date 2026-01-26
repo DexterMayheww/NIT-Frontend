@@ -1,9 +1,9 @@
 // lib/drupal/customFetch.ts
-const DRUPAL_DOMAIN = (process.env.NEXT_PUBLIC_DRUPAL_DOMAIN || 'http://drupal-college-cms.ddev.site').replace(/\/$/, '');
-console.log("DEBUG: Drupal Domain is set to:", DRUPAL_DOMAIN);
+const DRUPAL_DOMAIN = process.env.NEXT_PUBLIC_DRUPAL_DOMAIN?.replace(/\/$/, '');
 
 export interface FetchOptions extends RequestInit {
 	params?: Record<string, string | string[]>;
+    authenticated?: boolean; // Add this line
 }
 
 /**
@@ -14,7 +14,7 @@ export async function drupalFetch<T>(
 	endpoint: string,
 	options: FetchOptions = {}
 ): Promise<{ data: T; status: number; headers: Headers }> {
-	const { params, ...fetchOptions } = options;
+	const { params, authenticated, ...fetchOptions } = options;
 
 	let url: string;
 	if (endpoint.startsWith('http')) {
@@ -52,6 +52,14 @@ export async function drupalFetch<T>(
 		Accept: 'application/vnd.api+json',
 		...fetchOptions.headers,
 	};
+
+	if (authenticated) {
+        const { getServiceAccessToken } = await import('./getServiceToken');
+        const token = await getServiceAccessToken();
+        if (token) {
+            (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+        }
+    }
 
 	// Only add Content-Type for requests with body (POST, PATCH, etc.)
 	if (method !== 'GET' && method !== 'HEAD') {

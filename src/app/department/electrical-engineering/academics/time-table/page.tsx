@@ -1,0 +1,5 @@
+import DepartmentGenericPage from '@/components/DepartmentGenericPage';
+
+export default async function Page() {
+    return <DepartmentGenericPage path="/department/electrical-engineering/time-table" mode="generic" category="Academics" deptSlug="electrical-engineering" deptName="Electrical Engineering" />;
+}

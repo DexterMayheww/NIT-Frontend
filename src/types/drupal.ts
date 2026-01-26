@@ -18,8 +18,14 @@ export interface DrupalLinks {
 export interface DrupalIncluded {
   type: string;
   id: string;
-  attributes: Record<string, unknown>;
+  attributes: DrupalAttributes;
   relationships?: Record<string, DrupalRelationship>;
+}
+
+export interface DrupalAttributes {
+  filename: string;
+  uri: { value: string; url: string }
+  drupal_internal__id: string;
 }
 
 export interface DrupalRelationship {

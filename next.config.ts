@@ -8,12 +8,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         // hostname: "drupal-college-cms.ddev.site",
-        hostname: "refers-edited-sympathy-replied.trycloudflare.com",
+        hostname: "dev-nit-backend.pantheonsite.io",
         pathname: '/sites/**',
       },
       {
         protocol: "https",
-        hostname: "refers-edited-sympathy-replied.trycloudflare.com",
+        hostname: "dev-nit-backend.pantheonsite.io",
         pathname: '/sites/**',
       },
       {

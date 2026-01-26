@@ -1,87 +1,121 @@
+// src/components/DeptNavbar.tsx
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-const deptLinks = [
-  { label: 'Civil Engineering', href: '/department/civil-engineering' },
-  { 
-    label: 'People', 
-    href: '#',
-    children: [
-      { label: 'Faculty', href: '/department/civil-engineering/people/faculty' },
-      { label: 'Staff', href: '/department/civil-engineering/people/staff' },
-      { label: 'Students', href: '/department/civil-engineering/people/students' },
-    ]
-  },
-  { 
-    label: 'Academics', 
-    href: '#',
-    children: [
-      { label: 'Course Structure', href: '/department/civil-engineering/course-structure' },
-      { label: 'Syllabus', href: '/department/civil-engineering/syllabus' },
-      { label: 'Time-Table', href: '/department/civil-engineering/timetable' },
-    ]
-  },
-  { 
-    label: 'Research', 
-    href: '#',
-    children: [
-      { label: 'Projects', href: '/department/civil-engineering/projects' },
-      { label: 'Publications', href: '/department/civil-engineering/publications' },
-    ]
-  },
-];
-
-interface DeptNavbarProps {
-  scrolled: boolean;
-  mounted: boolean;
+export interface NavItem {
+    label: string;
+    href: string;
+    children?: { label: string; href: string }[];
 }
 
-export function DeptNavbar({ scrolled, mounted }: DeptNavbarProps) {
-  const pathname = usePathname();
+export function getDeptLinks(deptSlug: string): NavItem[] {
+    return [
+        { label: 'Home', href: `/department/${deptSlug}` },
+        {
+            label: 'People',
+            href: `/department/${deptSlug}/people/faculty`, // Primary link for the category
+            children: [
+                { label: 'Faculty', href: `/department/${deptSlug}/people/faculty` },
+                { label: 'Staff', href: `/department/${deptSlug}/people/staff` },
+                { label: 'Students', href: `/department/${deptSlug}/people/students` },
+                { label: 'Lab In-charge', href: `/department/${deptSlug}/people/lab-in-charge` },
+            ]
+        },
+        {
+            label: 'Academics',
+            href: `/department/${deptSlug}/academics/course-structure`,
+            children: [
+                { label: 'Course Structure', href: `/department/${deptSlug}/academics/course-structure` },
+                { label: 'Syllabus', href: `/department/${deptSlug}/academics/syllabus` },
+                { label: 'Time Table', href: `/department/${deptSlug}/academics/time-table` },
+            ]
+        },
+        {
+            label: 'Department committee',
+            href: `/department/${deptSlug}/department-committee/dppc`,
+            children: [
+                { label: 'DPPC', href: `/department/${deptSlug}/department-committee/dppc` },
+                { label: 'DUPC', href: `/department/${deptSlug}/department-committee/dupc` },
+            ]
+        },
+        {
+            label: 'Research',
+            href: `/department/${deptSlug}/research/projects`,
+            children: [
+                { label: 'Projects', href: `/department/${deptSlug}/research/projects` },
+                { label: 'Publications', href: `/department/${deptSlug}/research/publications` },
+                { label: 'Consultancies', href: `/department/${deptSlug}/research/consultancies` },
+            ]
+        },
+    ];
+}
 
-  return (
-    <nav className={`w-full transition-all duration-500 border-t border-[#00FFCC]/30 py-3 z-[100] ${mounted && scrolled
-                        ? 'bg-[#013A33]/95 backdrop-blur-xl z-[100]'
-                        : 'bg-[#013A33]/60'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-center h-12">
-          <ul className="flex items-center gap-1 md:gap-8 whitespace-nowrap">
-            {deptLinks.map((link) => (
-              <li key={link.label} className="relative group py-3">
-                <Link 
-                  href={link.href}
-                  className={`text-[12px] font-bold uppercase tracking-widest flex items-center gap-1 transition-colors ${
-                    pathname === link.href ? 'text-[#00FFCC]' : 'text-white/70 hover:text-[#00FFCC]'
-                  }`}
-                >
-                  {link.label}
-                  {link.children && <ChevronDown size={10} className="group-hover:rotate-180 transition-transform" />}
-                </Link>
+export function DeptNavbar({ deptSlug }: { deptSlug: string }) {
+    const pathname = usePathname();
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-                {link.children && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-48 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <div className="bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl p-2 shadow-2xl">
-                      {link.children.map((child) => (
-                        <Link
-                          key={child.label}
-                          href={child.href}
-                          className="block px-4 py-2 text-[12px] font-medium text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 rounded-lg transition-all"
+    const navItems = getDeptLinks(deptSlug);
+
+    return (
+        <nav className="bg-[#013A33]/80 backdrop-blur-xl border-b border-white/5 sticky top-0 z-[100] w-full transition-all duration-500">
+            <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-20">
+
+                {/* Navigation Links */}
+                <div className="flex items-center gap-12 h-full">
+                    {navItems.map((item) => (
+                        <div
+                            key={item.label}
+                            className="relative h-full flex items-center"
+                            onMouseEnter={() => setActiveDropdown(item.label)}
+                            onMouseLeave={() => setActiveDropdown(null)}
                         >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </nav>
-  );
+                            <Link
+                                href={item.href}
+                                className={`group relative py-2 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 ${pathname.startsWith(item.href) ? 'text-[#00FFCC]' : 'text-white/40 hover:text-white'}`}
+                            >
+                                {pathname.startsWith(item.href) && <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-[#00FFCC] shadow-[0_0_10px_#00FFCC]" />}
+                                {item.label}
+                                {item.children && <ChevronDown size={12} className={`transition-transform duration-500 ${activeDropdown === item.label ? 'rotate-180 text-[#00FFCC]' : 'opacity-30'}`} />}
+                            </Link>
+
+                            {/* Enhanced Dropdown */}
+                            {item.children && (
+                                <div className={`absolute left-0 top-[100%] transition-all duration-500 ease-out ${activeDropdown === item.label ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'}`}>
+                                    <div className="pt-2">
+                                        <ul className="bg-[#002A28]/95 backdrop-blur-2xl border border-white/10 p-3 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] min-w-[240px] overflow-hidden relative">
+                                            {/* Grid overlay for texture */}
+                                            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#00FFCC 1px, transparent 0)', backgroundSize: '15px 15px' }} />
+
+                                            {item.children.map((sub) => (
+                                                <li key={sub.label} className="relative z-10">
+                                                    <Link
+                                                        href={sub.href}
+                                                        className={`flex items-center justify-between px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#00FFCC]/10 transition-all rounded-sm group/link ${pathname === sub.href ? 'text-[#00FFCC] bg-[#00FFCC]/5' : 'text-white/50 hover:text-white'}`}
+                                                    >
+                                                        {sub.label}
+                                                        <div className="w-1 h-1 bg-[#00FFCC] rounded-full scale-0 group-hover/link:scale-100 transition-transform duration-300" />
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Brand Accent */}
+                <div className="hidden lg:flex items-center gap-3">
+                    <div className="h-0.5 w-12 bg-white/5" />
+                    <p className="text-[10px] font-mono uppercase tracking-[0.4em] text-[#00FFCC]/40">NITM <span className="text-white/20">Portal</span></p>
+                </div>
+            </div>
+        </nav>
+    );
 }
+

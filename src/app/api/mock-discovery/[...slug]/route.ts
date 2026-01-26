@@ -1,10 +1,11 @@
 // app/api/mock-discovery/[...slug]/route.ts
 import { NextResponse } from 'next/server';
+import { getDrupalDomain } from '@/lib/drupal/customFetch';
 
 export async function GET() {
   // CRITICAL: Matches the error log "got: https://drupal-college-cms.ddev.site/"
   // We hardcode the slash to ensure they match perfectly.
-  const DRUPAL_DOMAIN = "https://drupal-college-cms.ddev.site"; 
+  const DRUPAL_DOMAIN = getDrupalDomain(); 
 
   return NextResponse.json({
     // The issuer must match the 'iss' claim in the token EXACTLY (including trailing slash if present)

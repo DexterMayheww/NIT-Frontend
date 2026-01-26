@@ -70,3 +70,33 @@ export function parseDepartmentEditor(html: string) {
 
   return sections;
 }
+
+export function parseGenericDepartmentContent(html: string) {
+  const root = parse(html);
+  const tables = root.querySelectorAll('table');
+  
+  if (tables.length <= 1) {
+    return [{ title: null, content: html }];
+  }
+
+  const sections: { title: string | null; content: string }[] = [];
+  
+  // Strategy: Find each table, and look for the nearest heading above it
+  tables.forEach((table) => {
+    let title: string | null = null;
+    let prev = table.previousElementSibling;
+    
+    // Look back for a heading
+    while (prev) {
+      if (['H1', 'H2', 'H3', 'H4', 'H5'].includes(prev.tagName)) {
+        title = prev.textContent.trim();
+        break;
+      }
+      prev = prev.previousElementSibling;
+    }
+    
+    sections.push({ title, content: table.outerHTML });
+  });
+
+  return sections;
+}

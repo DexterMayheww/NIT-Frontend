@@ -19,7 +19,7 @@ import {
     LogOut
 } from 'lucide-react';
 import { getDrupalData } from '@/lib/drupal/getDrupalData';
-import { DeptNavbar } from './DeptNavbar';
+import { getDeptLinks } from './DeptNavbar';
 
 function SubMenuItem({ child }: { child: any }) {
     const [openLeft, setOpenLeft] = useState(false);
@@ -93,14 +93,23 @@ export default function Navbar() {
     const synth = useRef<SpeechSynthesis | null>(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileDropdownRef = useRef<HTMLDivElement>(null);
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const loginDropdownRef = useRef<HTMLDivElement>(null);
+
+    const [navHeight, setNavHeight] = useState(0);
+    const navRef = useRef<HTMLElement>(null);
 
     const isDeptPage = pathname.startsWith('/department/') && pathname !== '/department';
+    const deptSlug = isDeptPage ? pathname.split('/')[2] : '';
 
     // Close profile dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
                 setIsProfileOpen(false);
+            }
+            if (loginDropdownRef.current && !loginDropdownRef.current.contains(event.target as Node)) {
+                setIsLoginOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -185,6 +194,20 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, [mounted]);
+
+    useEffect(() => {
+        if (!navRef.current) return;
+
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                // Update the state with the actual, real-time height
+                setNavHeight(entry.contentRect.height);
+            }
+        });
+
+        observer.observe(navRef.current);
+        return () => observer.disconnect();
+    }, [mounted]); // Re-run if mount state changes to ensure we catch the initial paint
 
     const navItems = [
         { label: 'Home', href: '/' },
@@ -320,94 +343,56 @@ export default function Navbar() {
         },
     ];
 
+    const portalDropdownItems = [
+        { label: 'Webmail', href: '/webmail' },
+        { label: 'e-office', href: '/e-office' },
+        { label: 'MIS', href: '/mis' },
+        { label: 'Faculty/Staff login', href: '/login' },
+    ]
+
+    const activeLinks = isDeptPage ? getDeptLinks(deptSlug) : navItems;
+
     return (
         <>
-            <nav className={`fixed top-0 left-0 w-full z-[110] transition-all duration-500 ${mounted && scrolled ? '-translate-y-[40px]' : 'translate-y-0'}`}>
+            <div
+                style={{ height: `${navHeight}px` }}
+                className="w-full transition-[height] duration-500 ease-in-out"
+                aria-hidden="true"
+            />
+            <nav ref={navRef} className={`fixed top-0 left-0 w-full z-[110] transition-all duration-500 ${mounted && scrolled ? '-translate-y-[40px]' : 'translate-y-0'}`}>
 
-                {/* UTILITY BAR */}
-                <div className="bg-[#002A28] border-b border-white/5 h-[40px] flex items-center justify-between px-6 md:px-12">
+                {/* TIER 1: UTILITY BAR */}
+                <div className="bg-[#002A28] border-b border-white/5 h-[40px] flex items-center justify-between px-6 md:px-12 relative">
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-3 border-r border-white/10 pr-4">
-                            {/* Facebook */}
                             <a href="#" className="text-gray-400 hover:text-[#00FFCC] transition-colors">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                                </svg>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                             </a>
-
-                            {/* LinkedIn */}
                             <a href="#" className="text-gray-400 hover:text-[#00FFCC] transition-colors">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                                    <rect x="2" y="9" width="4" height="12"></rect>
-                                    <circle cx="4" cy="4" r="2"></circle>
-                                </svg>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                             </a>
-
-                            {/* Twitter / X */}
                             <a href="#" className="text-gray-400 hover:text-[#00FFCC] transition-colors">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-                                </svg>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
                             </a>
-
-                            {/* Instagram */}
-                            <a href="#" className="text-gray-400 hover:text-[#00FFCC] transition-colors">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                                </svg>
-                            </a>
-                        </div>
-
-                        <div className="hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                            <span className="flex items-center gap-1"><Phone size={12} /> +91 385 2413031</span>
-                            <span className="flex items-center gap-1" suppressHydrationWarning>
-                                <Mail size={12} /> 
-                                {mounted ? ' admin@nitmanipur.ac.in' : ' '}
-                            </span>
                         </div>
                     </div>
 
+                    {/* CENTERED CONTACT INFO */}
+                    <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                        <span className="flex items-center gap-2"><Phone size={12} className="text-[#00FFCC]" /> +91 385 2413031</span>
+                        <span className="flex items-center gap-2"><Mail size={12} className="text-[#00FFCC]" /> admin@nitmanipur.ac.in</span>
+                    </div>
+
                     <div className="flex items-center gap-6">
-                        {/* ACCESSIBILITY CONTROLS (Matching Image) */}
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-4 text-white text-xs font-bold mr-2">
-                                <button onClick={() => setFontSize(prev => Math.max(prev - 10, 80))} className="hover:text-[#00FFCC] transition-colors">A-</button>
-                                <button onClick={() => setFontSize(100)} className="hover:text-[#00FFCC] transition-colors">A</button>
-                                <button onClick={() => setFontSize(prev => Math.min(prev + 10, 130))} className="hover:text-[#00FFCC] transition-colors">A+</button>
-                            </div>
-
-                            {/* Invert Buttons */}
-                            <div className="flex items-center gap-1">
-                                <button
-                                    onClick={() => setIsInverted(true)}
-                                    className="w-7 h-8 bg-black border border-white/20 rounded flex items-center justify-center text-white text-[10px] font-black hover:scale-105 transition-transform"
-                                    title="High Contrast / Dark Mode"
-                                >
-                                    A
-                                </button>
-                                <button
-                                    onClick={() => setIsInverted(false)}
-                                    className="w-7 h-8 bg-[#E5E7EB] border border-black/10 rounded flex items-center justify-center text-black text-[10px] font-black hover:scale-105 transition-transform"
-                                    title="Standard Mode"
-                                >
-                                    A
-                                </button>
-                            </div>
+                        <div className="flex items-center gap-4 text-white text-xs font-bold mr-2">
+                            <button onClick={() => setFontSize(prev => Math.max(prev - 10, 80))} className="hover:text-[#00FFCC]">A-</button>
+                            <button onClick={() => setFontSize(100)} className="hover:text-[#00FFCC]">A</button>
+                            <button onClick={() => setFontSize(prev => Math.min(prev + 10, 130))} className="hover:text-[#00FFCC]">A+</button>
                         </div>
-
-                        {/* Screen Reader Toggle */}
-                        <button
-                            onClick={() => setIsTTSEnabled(!isTTSEnabled)}
-                            className={`flex items-center gap-2 px-3 py-1 rounded-full transition-all text-[9px] font-black uppercase ${isTTSEnabled ? 'bg-[#00FFCC] text-[#013A33]' : 'bg-white/5 text-gray-300'
-                                }`}
-                        >
-                            {isTTSEnabled ? <Volume2 size={12} /> : <VolumeX size={12} />}
-                            {isTTSEnabled ? 'Audio ON' : 'Screen Reader'}
-                        </button>
-
+                        <div className="flex items-center gap-1">
+                            <button onClick={() => setIsInverted(true)} className="w-7 h-8 bg-black border border-white/20 rounded flex items-center justify-center text-white text-[10px] font-black">A</button>
+                            <button onClick={() => setIsInverted(false)} className="w-7 h-8 bg-[#E5E7EB] border border-black/10 rounded flex items-center justify-center text-black text-[10px] font-black">A</button>
+                        </div>
                         <select className="bg-transparent text-[10px] font-bold uppercase text-gray-400 focus:outline-none cursor-pointer">
                             <option value="en">EN</option>
                             <option value="hi">HI</option>
@@ -415,124 +400,127 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* MAIN BAR */}
-                <div className={`relative w-full px-6 md:px-12 flex py-3 items-center justify-between transition-all duration-500 border-b z-[110] ${mounted && scrolled
-                        ? 'bg-[#013A33]/95 backdrop-blur-xl border-[#00FFCC]/20'
-                        : 'bg-[#013A33]/60 border-transparent'
-                    }`}>
+                {/* TIER 2: LOGO & ACTIONS BAR */}
+            <div className={`relative w-full h-fit px-6 md:px-12 flex h-[70px] z-[120] items-center justify-between transition-all duration-500 border-b border-white/5 ${mounted && scrolled ? 'bg-[#013A33]/95 backdrop-blur-xl' : 'bg-[#013A33]/60'}`}>
+                
+                <Link href="/" className="flex items-center gap-4 no-invert">
+                    <Image
+                        src={`${DRUPAL_DOMAIN}/sites/default/files/2026-01/nitm_logo.webp`}
+                        alt="NITM Logo"
+                        width={1000}
+                        height={500}
+                        className="object-contain h-[200px] w-fit"
+                        unoptimized={process.env.NODE_ENV === 'development'}
+                    />
+                </Link>
 
-                    <Link href="/" className="flex items-center gap-4 group no-invert">
-                            <Image
-                                src={`${DRUPAL_DOMAIN}/sites/default/files/2026-01/nitm_logo.png`}
-                                alt="NITM Logo"
-                                width={45}
-                                height={45}
-                                className="w-50 object-contain"
-                                unoptimized={process.env.NODE_ENV === 'development'}
-                            />
-                    </Link>
-
-                    {/* DESKTOP HOVER DROPDOWNS */}
-                    <div className="hidden xl:flex items-center h-full z-[110]">
-                        <ul className="flex items-center gap-8 h-full">
-                            {navItems.map((item) => (
-                                <li key={item.label} className="relative group h-full flex items-center">
-                                    <Link
-                                        href={item.href}
-                                        className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${pathname === item.href ? 'text-[#00FFCC]' : 'text-gray-200 hover:text-white'
-                                            }`}
-                                    >
-                                        {item.label}
-                                        {item.children && <ChevronDown size={12} className="group-hover:rotate-180 transition-transform duration-300" />}
-                                    </Link>
-
-                                    {item.children && (
-                                        <div className="absolute top-full left-0 w-64 pt-4 transition-all duration-300 cubic-bezier opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 z-[110]">
-                                            <div className="bg-[#002A28]/95 backdrop-blur-2xl border border-white/10 rounded-xl p-2 shadow-2xl">
-                                                <div className="flex flex-col gap-1">
-                                                    {item.children.map((child) => (
-                                                        <SubMenuItem key={child.label} child={child} />
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
+                <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-1.5 gap-2">
+                        <Search size={14} className="text-gray-400" />
+                        <input type="text" placeholder="Search..." className="bg-transparent text-[11px] text-white focus:outline-none w-32" />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button className="p-2 text-gray-300 hover:text-[#00FFCC] transition-colors"><Search size={18} /></button>
-                        {session ? (
-                            <div className="relative" ref={profileDropdownRef}>
-                                {/* Profile Trigger */}
-                                <button
-                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                    className="flex items-center gap-3 pl-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all group"
-                                >
-                                    <div className="flex flex-col items-end hidden md:flex">
-                                        <span className="text-[9px] font-black uppercase tracking-wider text-[#00FFCC]">
-                                            {session.user?.name || 'User Account'}
-                                        </span>
-                                        <span className="text-[8px] text-gray-400 uppercase font-bold">Profile Settings</span>
-                                    </div>
-                                    <div className="w-8 h-8 rounded-full bg-[#00FFCC]/20 border border-[#00FFCC]/40 flex items-center justify-center text-[#00FFCC] group-hover:scale-105 transition-transform">
-                                        <ChevronDown size={14} className={`transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
-                                    </div>
-                                </button>
+                    {session ? (
+                        <div className="relative" ref={profileDropdownRef}>
+                            <button 
+                                onClick={() => setIsProfileOpen(!isProfileOpen)} 
+                                className="flex items-center gap-3 pl-4 pr-2 py-1 rounded-full border border-[#00FFCC]/30 bg-[#00FFCC]/5 hover:bg-[#00FFCC]/10 transition-colors"
+                            >
+                                <div className="flex flex-col items-end hidden md:flex">
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#00FFCC]">
+                                        {session.user?.name || 'Account'}
+                                    </span>
+                                </div>
+                                <div className="w-7 h-7 rounded-full bg-[#00FFCC] flex items-center justify-center text-[#013A33]">
+                                    <ChevronDown size={14} className={`transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                </div>
+                            </button>
 
-                                {/* Dropdown Menu */}
-                                {isProfileOpen && (
-                                    <div className="absolute right-0 mt-3 w-60 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="px-4 py-3 border-b border-white/5 mb-1">
-                                            <p className="text-[8px] text-gray-500 uppercase tracking-widest font-black">Logged in as</p>
-                                            <p className="text-[11px] text-[#00FFCC] truncate font-bold">{session.user?.email}</p>
-                                        </div>
-
-                                        {/* BACKEND LINK */}
-                                        <Link 
-                                            href={`${DRUPAL_DOMAIN}/admin/content`} 
-                                            onClick={() => setIsProfileOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
+                            {isProfileOpen && (
+                                <div className="absolute right-0 mt-3 w-64 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[120] animate-in fade-in slide-in-from-top-2">
+                                    {/* SESSION ACTIONS */}
+                                    <Link href={`${DRUPAL_DOMAIN}/admin/content`} className="flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5">
+                                        <LayoutDashboard size={14} /> Dashboard
+                                    </Link>
+                                    
+                                    {/* PORTAL LINKS (Integrated when logged in) */}
+                                    <div className="my-2 border-t border-white/5" />
+                                    <div className="px-4 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Quick Access</div>
+                                    {portalDropdownItems.filter(i => i.label !== 'Faculty/Staff login').map((option) => (
+                                        <Link
+                                            key={option.label}
+                                            href={option.href}
+                                            className="block px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
                                         >
-                                            <LayoutDashboard size={14} />
-                                            Go to Dashboard
+                                            {option.label}
                                         </Link>
+                                    ))}
 
-                                        <div className="h-px bg-white/5 my-1" />
+                                    <div className="my-2 border-t border-white/5" />
+                                    <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/10 transition-colors">
+                                        <LogOut size={14} /> Sign Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="relative" ref={loginDropdownRef}>
+                            <button
+                                onClick={() => setIsLoginOpen(!isLoginOpen)}
+                                className="bg-[#00FFCC] text-[#013A33] px-6 h-9 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2"
+                            >
+                                Portal Login
+                                <ChevronDown size={12} className={`transition-transform duration-300 ${isLoginOpen ? 'rotate-180' : ''}`} />
+                            </button>
 
-                                        <button
-                                            onClick={() => {
-                                                setIsProfileOpen(false);
-                                                signOut();
-                                            }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/10 transition-all"
+                            {isLoginOpen && (
+                                <div className="absolute right-0 mt-3 w-56 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[120] animate-in fade-in slide-in-from-top-2">
+                                    {portalDropdownItems.map((option) => (
+                                        <Link
+                                            key={option.label}
+                                            href={option.href}
+                                            onClick={() => setIsLoginOpen(false)}
+                                            className="block px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
                                         >
-                                            <LogOut size={14} />
-                                            Sign Out
-                                        </button>
+                                            {option.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    <button onClick={() => setIsOpen(!isOpen)} className="xl:hidden text-white"><Menu size={24} /></button>
+                </div>
+            </div>
+
+                {/* TIER 3: CONTEXTUAL NAVIGATION BAR */}
+                <div className={`w-full px-6 md:px-12 flex h-11 z-[110] items-center justify-center transition-all duration-500 border-b border-white/5 ${mounted && scrolled ? 'bg-[#013A33]/95 backdrop-blur-xl border-[#00FFCC]/20' : 'bg-[#013A33]/60'
+                    }`}>
+                    <ul className="flex items-center justify-center gap-8 h-full">
+                        {activeLinks.map((item) => (
+                            <li key={item.label} className="relative group h-full flex items-center">
+                                <Link
+                                    href={item.href}
+                                    className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${pathname === item.href ? 'text-[#00FFCC]' : 'text-gray-200 hover:text-white'
+                                        }`}
+                                >
+                                    {item.label}
+                                    {item.children && <ChevronDown size={12} className="group-hover:rotate-180 transition-transform duration-300" />}
+                                </Link>
+
+                                {item.children && (
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 pt-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-[110]">
+                                        <div className="bg-[#002A28]/95 backdrop-blur-2xl border border-white/10 rounded-xl p-2 shadow-2xl">
+                                            {item.children.map((child: any) => (
+                                                <SubMenuItem key={child.label} child={child} />
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
-                            </div>
-                        ) : (
-                            <Link href="/login">
-                                <button className="bg-[#00FFCC] text-[#013A33] px-6 h-9 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-[#00FFCC]/10">
-                                    Portal Login
-                                </button>
-                            </Link>
-                        )}
-                        <button onClick={() => setIsOpen(!isOpen)} className="xl:hidden text-white p-2">
-                            {isOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
-                    </div>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-                {/* SECONDARY DEPARTMENT NAVBAR */}
-                {isDeptPage && (
-                    <div className="animate-in fade-in slide-in-from-top-1 duration-500 z-[100]">
-                        <DeptNavbar scrolled={scrolled} mounted={mounted} />
-                    </div>
-                )}
             </nav>
         </>
     );

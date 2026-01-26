@@ -90,8 +90,6 @@ export function processNode(
   } else if (attrs.field_editors?.processed) {
     editors = [attrs.field_editors.processed];
   }
-  console.log("Field Editors", attrs.field_editors);
-  console.log("Field Editor", attrs.field_editor);
 
   return {
     id: node.id,
@@ -171,7 +169,6 @@ export async function getNodeByPath(
   // 3. Process the single node
   // In a collection fetch, data is an array. In an individual fetch, data is a single object.
   const node = response.data.data;
-  console.log("Node data: ", node);
 
   return {
     data: processNode(node, response.data.included),

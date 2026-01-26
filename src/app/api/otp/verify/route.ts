@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getDrupalDomain } from "@/lib/drupal/customFetch";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
   const accessToken = session.user.accessToken;
 
   // 1. Call Drupal to Verify
-  const DRUPAL_API = process.env.NEXT_PUBLIC_DRUPAL_DOMAIN || "https://drupal-college-cms.ddev.site";
+  const DRUPAL_API = getDrupalDomain();
 
   try {
     const res = await fetch(`${DRUPAL_API}/api/v1/auth/otp/verify`, {
