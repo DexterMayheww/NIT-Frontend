@@ -60,14 +60,14 @@ export default async function Page() {
 	const directorImg = director?.images?.[0]?.url || '/photo/nitDirector.png';
 	const aboutImg = aboutNit?.images?.[0]?.url || '/photo/aboutNit.png';
 
-	
+
 
 	return (
 		<>
 			<main className="min-h-screen bg-[#013A33] text-white font-sans selection:bg-[#00FFCC] selection:text-[#002A28]">
 
 				{/* --- SECTION 1: HERO & NOTICES --- */}
-				<section className="relative w-full min-h-screen lg:h-[85vh] flex items-center justify-center overflow-hidden">
+				<section className="relative w-full h-[45vh] lg:h-[85vh] flex items-center justify-center overflow-hidden">
 					{/* Background Video */}
 					<video autoPlay muted loop playsInline className="absolute top-0 left-0 z-0 object-cover w-full h-full opacity-40">
 						<source src={homeVideo} type="video/mp4" />
@@ -94,13 +94,13 @@ export default async function Page() {
 				</div>
 
 
-				<section className='m-12'>
+				<section className='mx-6 my-10 md:m-12'>
 					<NoticeBoard notices={noticesRes.data as any} newsFiles={newsBoardData?.files} />
 				</section>
 
 
 				{/* --- SECTION 3: VISION, MISSION & ABOUT --- */}
-				<section className="py-20 px-4 bg-[#013A33] m-12">
+				<section className="py-12 md:py-20 px-4 bg-[#013A33] mx-6 my-10 md:m-12">
 					<div className="flex flex-col-reverse items-stretch gap-10 mx-auto lg:flex-row">
 
 						{/* Left: About Text */}
@@ -129,16 +129,16 @@ export default async function Page() {
 						{/* Right: Vision & Mission Cards */}
 						<div className="flex flex-col gap-6 lg:w-1/2">
 							{/* Vision */}
-							<div className="flex-1 bg-white text-[#002A28] p-8 md:p-10 rounded-t-3xl rounded-br-3xl shadow-xl hover:-translate-y-2 transition-transform duration-300">
-								<h2 className="text-4xl font-bold mb-4 border-b-4 border-[#002A28] inline-block pb-1">Vision</h2>
-								<p className="text-lg font-medium leading-relaxed">
+							<div className="flex-1 bg-white text-[#002A28] p-6 md:p-10 rounded-t-3xl rounded-br-3xl shadow-xl hover:-translate-y-2 transition-transform duration-300">
+								<h2 className="text-2xl md:text-4xl font-bold mb-4 border-b-4 border-[#002A28] inline-block pb-1">Vision</h2>
+								<p className="text-base md:text-lg font-medium leading-relaxed">
 									{visionMission?.details || 'Vision loading...'}
 								</p>
 							</div>
 							{/* Mission */}
-							<div className="flex-1 bg-[#00463C] text-white p-8 md:p-10 rounded-b-3xl rounded-tl-3xl shadow-xl hover:-translate-y-2 transition-transform duration-300 border border-[#006A58]">
-								<h2 className="inline-block pb-1 mb-4 text-4xl font-bold">Mission</h2>
-								<div className="prose prose-invert max-w-none text-lg leading-relaxed
+							<div className="flex-1 bg-[#00463C] text-white p-6 md:p-10 rounded-b-3xl rounded-tl-3xl shadow-xl hover:-translate-y-2 transition-transform duration-300 border border-[#006A58]">
+								<h2 className="inline-block pb-1 mb-4 text-2xl md:text-4xl font-bold">Mission</h2>
+								<div className="prose prose-invert max-w-none text-base md:text-lg leading-relaxed
                                 [&_ul]:list-none [&_li]:relative [&_li]:pl-8 [&_li]:mb-3
                                 [&_li::before]:content-['➤'] [&_li::before]:absolute [&_li::before]:left-0 [&_li::before]:text-[#00FFCC]
                             ">
@@ -152,31 +152,31 @@ export default async function Page() {
 				</section>
 
 				{/* --- SECTION 4: DIRECTOR'S MESSAGE --- */}
-				<section className="py-20 bg-[#002A28] relative">
-					<div className="px-4 m-12">
-						<h2 className="mb-16 text-5xl font-bold text-center text-white drop-shadow-lg">Director&apos;s Message</h2>
+				<section className="py-12 md:py-20 bg-[#002A28] relative">
+					<div className="px-4 mx-6 my-10 md:m-12">
+						<h2 className="mb-8 md:mb-16 text-2xl md:text-5xl font-bold text-center text-white drop-shadow-lg">Director&apos;s Message</h2>
 
-						<div className="flex flex-col lg:flex-row items-center gap-12 bg-[#013A33] rounded-3xl p-8 md:p-12 shadow-2xl border border-[#006A58]">
-							<div className="relative lg:w-1/5">
+						<div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 bg-[#013A33] rounded-3xl p-6 md:p-12 shadow-2xl border border-[#006A58]">
+							<div className="relative lg:w-1/5 shrink-0">
 								<div className="absolute inset-0 bg-[#00FFCC] blur-3xl opacity-10 rounded-full"></div>
 								<Image
 									src={directorImg}
 									alt="Director"
-									className="relative z-10 rounded-2xl shadow-lg transform transition duration-500 hover:scale-[1.02] h-[400px] w-auto"
-									width={100}
-									height={100}
+									className="relative z-10 rounded-2xl shadow-lg transform transition duration-500 hover:scale-[1.02] h-[300px] md:h-[400px] w-auto object-cover"
+									width={300}
+									height={400}
 									unoptimized={process.env.NODE_ENV === 'development'}
 								/>
 							</div>
 
 							<div className="text-center lg:w-4/5 lg:text-left">
-								<h3 className="text-3xl md:text-4xl font-bold mb-2 text-[#00FFCC]">
+								<h3 className="text-xl md:text-4xl font-bold text-[#00FFCC] mb-2">
 									{director?.title || 'Prof. D V L N Somayajulu'}
 								</h3>
-								<p className="mb-8 text-xl font-medium text-gray-400">Director, NIT Manipur</p>
+								<p className="mb-6 text-lg md:text-2xl font-semibold text-white opacity-90">Director, NIT Manipur</p>
 
-								<p className="text-lg italic leading-relaxed text-gray-200">
-									{director?.details}
+								<p className="text-sm md:text-lg italic leading-relaxed text-gray-200 mb-8">
+									&quot;{director?.details || "Director's message loading..."}&quot;
 								</p>
 
 								<button className="mt-8 px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-[#002A28] transition-all">
@@ -188,9 +188,9 @@ export default async function Page() {
 				</section>
 
 				{/* --- SECTION 5: ADMISSION --- */}
-				<section className="py-20 bg-[#013A33] px-4 max-w-7xl mx-auto">
-					<h2 className="mb-4 text-5xl font-bold text-center text-white">Admission</h2>
-					<div className="w-24 h-1 bg-[#00FFCC] mx-auto mb-10 rounded-full"></div>
+				<section className="py-12 md:py-20 bg-[#013A33] px-4 max-w-7xl mx-auto">
+					<h2 className="mb-4 text-2xl md:text-5xl font-bold text-center text-white">Admission</h2>
+					<div className="w-20 md:w-24 h-1 bg-[#00FFCC] mx-auto mb-8 md:mb-10 rounded-full"></div>
 					<AdmissionTabs
 						btech={btech ? { title: btech.title, details: btech.details, fileLink: btech.files?.[0].url || '' } : null}
 						mtech={mtech ? { title: mtech.title, details: mtech.details, fileLink: mtech.files?.[0].url || '' } : null}
@@ -200,9 +200,9 @@ export default async function Page() {
 				</section>
 
 				{/* --- SECTION 6: DEPARTMENTS --- */}
-				<section className="py-20 bg-[#002A28] px-4">
+				<section className="py-12 md:py-20 bg-[#002A28] px-4">
 					<div className="mx-auto max-w-7xl">
-						<h2 className="mb-16 text-5xl font-bold text-center text-white">Departments</h2>
+						<h2 className="mb-12 md:mb-16 text-2xl md:text-5xl font-bold text-center text-white">Departments</h2>
 
 						<div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 							{departments.map((dept, index) => (
@@ -248,18 +248,18 @@ export default async function Page() {
 				</div>
 
 				{/* --- PLACEMENT STUDENT CARDS --- */}
-				<section className="py-24 bg-[#013A33] overflow-hidden border-t border-[#006A58]/20">
-					<div className="max-w-7xl mx-auto px-4 mb-20 text-center">
-						<h2 className="mb-16 text-5xl font-bold text-center text-white">Placements</h2>
+				<section className="py-16 md:py-24 bg-[#013A33] overflow-hidden border-t border-[#006A58]/20">
+					<div className="max-w-7xl mx-auto px-4 mb-12 md:mb-20 text-center">
+						<h2 className="mb-10 md:mb-16 text-2xl md:text-5xl font-bold text-center text-white">Placements</h2>
 					</div>
 
 					<div className="marquee-container">
-						<div className="marquee-track my-10">
+						<div className="marquee-track my-6 md:my-10">
 							{[...placementStudents, ...placementStudents].map((student, idx) => (
-								<div key={idx} className="marquee-card mx-6">
-									<div className="group w-[420px] bg-[#002A28] rounded-[3rem] overflow-hidden border border-[#006A58]/40 hover:border-[#00FFCC]/60 relative transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
+								<div key={idx} className="marquee-card mx-3 md:mx-6">
+									<div className="group w-[300px] sm:w-[420px] bg-[#002A28] rounded-[2rem] sm:rounded-[3rem] overflow-hidden border border-[#006A58]/40 hover:border-[#00FFCC]/60 relative transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
 
-										<div className="relative h-72 w-full overflow-hidden">
+										<div className="relative h-60 sm:h-72 w-full overflow-hidden">
 											{student.image && (
 												<Image
 													src={student.image}
@@ -279,19 +279,19 @@ export default async function Page() {
 										</div>
 
 										{/* Content Section */}
-										<div className="p-10 pt-8 relative -mt-10 bg-[#002A28] rounded-t-[3.5rem] border-t border-[#006A58]/50">
-											<div className="flex items-center gap-3 mb-6">
-												<span className="text-[#00FFCC] font-mono text-s font-bold px-3 py-1 rounded border border-[#00FFCC]/20 bg-[#00FFCC]/5">
+										<div className="p-6 sm:p-10 pt-6 sm:pt-8 relative -mt-8 sm:-mt-10 bg-[#002A28] rounded-t-[2.5rem] sm:rounded-t-[3.5rem] border-t border-[#006A58]/50">
+											<div className="flex items-center gap-3 mb-4 sm:mb-6">
+												<span className="text-[#00FFCC] font-mono text-[10px] sm:text-s font-bold px-2 sm:px-3 py-1 rounded border border-[#00FFCC]/20 bg-[#00FFCC]/5">
 													{student.company}
 												</span>
 												<span className="h-[1px] flex-grow bg-[#006A58]/50" />
 											</div>
 
-											<div className="min-h-[140px] flex flex-col justify-start">
-												<h3 className="text-4xl font-black text-white mb-2 leading-[1.1] group-hover:text-[#00FFCC] transition-colors break-words">
+											<div className="min-h-[100px] sm:min-h-[140px] flex flex-col justify-start">
+												<h3 className="text-2xl sm:text-4xl font-black text-white mb-1 sm:mb-2 leading-[1.1] group-hover:text-[#00FFCC] transition-colors break-words">
 													{student.name}
 												</h3>
-												<p className="text-2xl font-light text-gray-400">{student.package}</p>
+												<p className="text-lg sm:text-2xl font-light text-gray-400">{student.package}</p>
 											</div>
 
 											<div className="bg-[#013A33] p-6 rounded-2xl border border-[#006A58]/30 mb-8 h-[100px] flex items-center">
@@ -316,9 +316,9 @@ export default async function Page() {
 				</section>
 
 				{/* --- SECTION 7: GALLERY --- */}
-				<section className="py-20 bg-[#013A33] flex flex-col items-center">
+				<section className="py-12 md:py-20 bg-[#013A33] flex flex-col items-center">
 					{/* Gallery Title Capsule */}
-					<h2 className="text-5xl font-bold text-center text-white">Gallery</h2>
+					<h2 className="text-2xl md:text-5xl font-bold text-center text-white">Gallery</h2>
 
 					{/* Carousel Logic */}
 					{gallery?.images && gallery.images.length > 0 ? (

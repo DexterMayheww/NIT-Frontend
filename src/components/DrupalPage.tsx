@@ -1,9 +1,14 @@
 import { fetchDrupalContent } from '@/utils/fetchItem';
 import { getChildNodes } from '@/lib/drupal/generated';
-import { getDrupalDomain } from '@/lib/drupal/customFetch';
+import { getDrupalDomain, drupalFetch, getDrupalFileUrl } from '@/lib/drupal/customFetch';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import ProfilePage from '@/components/ProfilePage';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { parseProfileEditor } from '@/lib/parser';
+import { DrupalJsonApiResponse } from '@/types/drupal';
 
 interface DrupalPageProps {
     slug: string[];
@@ -60,6 +65,60 @@ export default async function DrupalPage({ slug }: DrupalPageProps) {
             .replace(/href="\/sites/g, `href="${DRUPAL_DOMAIN}/sites`);
     }
 
+    // Handle Profile Page specifically
+    if (data.raw.type === 'node--profile_page' || data.raw.type === 'node--faculty_profile' || data.raw.type === 'profile_page') {
+        const session = await getServerSession(authOptions);
+        const user = session?.user as Record<string, unknown>;
+        const profileAttrs = data.raw.attributes as Record<string, any>;
+        const profileRels = data.raw.relationships as Record<string, any>;
+
+        // Permissions logic
+        let canEdit = false;
+        const profileOwnerId = profileRels.field_profile_owner?.data?.id;
+        const profileDeptId = profileRels.field_parent_type?.data?.id;
+
+        // Fetch User Picture from /jsonapi/user/user
+        let userPictureUrl = data.images?.[0]?.url || null;
+        if (profileOwnerId) {
+            const userRes = await drupalFetch<DrupalJsonApiResponse<any>>(`/jsonapi/user/user/${profileOwnerId}`, {
+                params: { 'include': 'user_picture' },
+                authenticated: true
+            });
+
+            if (userRes.data?.included) {
+                const picture = userRes.data.included.find((inc: any) => inc.type === 'file--file');
+                if (picture?.attributes?.uri?.url) {
+                    userPictureUrl = getDrupalFileUrl(picture.attributes.uri.url);
+                }
+            }
+        }
+
+        if (user) {
+            if (user.role === 'administrator') {
+                canEdit = true;
+            } else if (user.role === 'department_head' && String(user.departmentId) === String(profileDeptId)) {
+                canEdit = true;
+            } else if (String(user.id) === String(profileOwnerId)) {
+                canEdit = true;
+            }
+        }
+
+        const profileData = {
+            title: data.title,
+            details: data.details,
+            image: userPictureUrl,
+            email: profileAttrs.field_email || (data.details?.match(/Email: ([\w.-]+@[\w.-]+\.\w+)/)?.[1]) || null,
+            designation: profileAttrs.field_designation || null,
+            department: slug[1]?.replace(/-/g, ' ') || 'Department',
+            departmentSlug: slug[1] || 'civil-engineering',
+            sections: parseProfileEditor(data.editor || '') as Record<string, string>,
+            canEdit,
+            editUrl: `${DRUPAL_DOMAIN}/node/${data.nid}/edit`,
+        };
+
+        return <ProfilePage data={profileData} />;
+    }
+
     return (
         <main className="min-h-screen bg-white">
             <div className="bg-slate-50 border-b py-16 px-10">
@@ -98,7 +157,7 @@ export default async function DrupalPage({ slug }: DrupalPageProps) {
                 {!path.includes('gallery') && data.images?.length > 0 && (
                     <div className="grid grid-cols-1 gap-6 mb-12">
                         {data.images.map((img, i) => (
-                            <div key={i} className="relative w-full h-[500px]">
+                            <div key={i} className="relative w-full h-125">
                                 <Image
                                     src={img.url}
                                     alt={img.alt || ''}

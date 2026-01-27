@@ -52,7 +52,7 @@ export function parseDepartmentEditor(html: string) {
 
   const headers = root.querySelectorAll('h1, h2');
   
-  headers.forEach((header, index) => {
+  headers.forEach((header) => {
     const title = header.textContent.trim().toLowerCase();
     let content = '';
     let next = header.nextElementSibling;
@@ -97,6 +97,43 @@ export function parseGenericDepartmentContent(html: string) {
     
     sections.push({ title, content: table.outerHTML });
   });
+
+  return sections;
+}
+
+export function parseProfileEditor(html: string) {
+  const root = parse(html);
+  const sections: Record<string, string> = {
+    home: '',
+    publications: '',
+    academics: '',
+    projects: ''
+  };
+
+  const headers = root.querySelectorAll('h1, h2, h3');
+  const validTabs = ['home', 'publications', 'academics', 'projects'];
+  
+  headers.forEach((header) => {
+    const title = header.textContent.trim().toLowerCase();
+    const tabKey = validTabs.find(tab => title.includes(tab));
+    
+    if (tabKey) {
+      let content = '';
+      let next = header.nextElementSibling;
+
+      // Collect all siblings until the next header of same or higher level
+      while (next && !['H1', 'H2', 'H3'].includes(next.tagName)) {
+        content += next.outerHTML;
+        next = next.nextElementSibling;
+      }
+      sections[tabKey] = content;
+    }
+  });
+
+  // Fallback: If no headers found, put everything in home
+  if (!Object.values(sections).some(val => val.length > 0)) {
+    sections.home = html;
+  }
 
   return sections;
 }

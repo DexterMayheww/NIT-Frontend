@@ -61,6 +61,7 @@ export interface DrupalNodeBase {
     field_videos?: DrupalRelationship;
     field_files?: DrupalRelationship;
     field_parent_type?: DrupalRelationship;
+    field_profile_owner?: DrupalRelationship;
   };
 }
 

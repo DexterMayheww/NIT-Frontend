@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { parseGenericDepartmentContent } from '@/lib/parser';
-import { ExternalLink, FileText, Download, File } from 'lucide-react';
+import { ExternalLink, FileText, Download } from 'lucide-react';
 import { DrupalJsonApiResponse } from '@/types/drupal';
 
 
@@ -60,6 +60,16 @@ export default async function DepartmentGenericPage({
         const rawUsers = facultyRes.data?.data || [];
         const included = facultyRes.data?.included || [];
 
+        // Fetch profile nodes to get aliases
+        const profilesRes = await drupalFetch<DrupalJsonApiResponse<any[]>>('/jsonapi/node/profile_page', {
+            params: {
+                'filter[field_parent_type.id]': deptUuid,
+            },
+            authenticated: true,
+            next: { revalidate: 0 }
+        });
+        const profiles = profilesRes.data?.data || [];
+
         // Build Maps
         const fileMap = included.reduce((acc: any, item) => {
             if (item.type === 'file--file') {
@@ -98,6 +108,10 @@ export default async function DepartmentGenericPage({
                 }
             }
 
+            // Link Logic: Find profile node for this user
+            const profile = profiles.find(p => p.relationships?.field_profile_owner?.data?.id === u.id);
+            const profilePath = profile?.attributes?.path?.alias || `/department/${deptSlug}/${mode}/${uid}`;
+
             return {
                 id: u.id,
                 uid: uid,
@@ -105,7 +119,8 @@ export default async function DepartmentGenericPage({
                 mail: u.attributes.mail,
                 designation: u.attributes.field_designation || (roleFilter === 'faculty' ? 'Faculty Member' : 'Staff Member'),
                 image: resolvedUrlOrNull(pictureId, fileMap),
-                canEdit: canEdit
+                canEdit: canEdit,
+                profilePath: profilePath
             };
         }).filter(Boolean);
 
@@ -193,17 +208,19 @@ export default async function DepartmentGenericPage({
                                     <div key={member.id} className="group relative">
                                         <div className="absolute -inset-2 border border-white/5 group-hover:border-[#00FFCC]/30 transition-colors duration-500 rounded-sm" />
 
-                                        <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#002A28]">
-                                            {member.image ? (
-                                                <Image
-                                                    src={`${process.env.NEXT_PUBLIC_DRUPAL_DOMAIN}${member.image}`}
-                                                    alt={member.display_name}
-                                                    fill
-                                                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center opacity-20 text-[10px] uppercase tracking-widest font-mono">No Portrait</div>
-                                            )}
+                                        <div className="relative aspect-4/5 overflow-hidden mb-6 bg-[#002A28] block">
+                                            <Link href={member.profilePath} className="absolute inset-0 z-10">
+                                                {member.image ? (
+                                                    <Image
+                                                        src={`${process.env.NEXT_PUBLIC_DRUPAL_DOMAIN}${member.image}`}
+                                                        alt={member.display_name}
+                                                        fill
+                                                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center opacity-20 text-[10px] uppercase tracking-widest font-mono">No Portrait</div>
+                                                )}
+                                            </Link>
 
                                             {member.canEdit && (
                                                 <div className="absolute top-4 right-4 z-20">
@@ -217,13 +234,15 @@ export default async function DepartmentGenericPage({
                                                     </a>
                                                 </div>
                                             )}
-                                            <div className="absolute top-0 right-0 w-8 h-8 bg-[#013A33] translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-l border-white/10" />
+                                            <div className="absolute top-0 right-0 w-8 h-8 bg-[#013A33] translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-l border-white/10 z-20" />
                                         </div>
 
                                         <div className="relative">
-                                            <h3 className="text-2xl font-bold uppercase tracking-tight group-hover:text-[#00FFCC] transition-colors">
-                                                {member.display_name}
-                                            </h3>
+                                            <Link href={member.profilePath}>
+                                                <h3 className="text-2xl font-bold uppercase tracking-tight group-hover:text-[#00FFCC] transition-colors">
+                                                    {member.display_name}
+                                                </h3>
+                                            </Link>
                                             <p className="text-[#00FFCC]/60 font-mono text-[14px] uppercase tracking-widest mb-1">
                                                 {member.designation}
                                             </p>
@@ -311,7 +330,7 @@ export default async function DepartmentGenericPage({
 														[&_thead]:bg-[#00FFCC]/10
 														[&_th]:py-5 [&_th]:px-6 [&_th]:text-[#00FFCC] [&_th]:text-[11px] [&_th]:uppercase [&_th]:tracking-[0.2em] [&_th]:font-black [&_th]:text-left [&_th]:border-b [&_th]:border-white/20
 														[&_td]:py-6 [&_td]:px-6 [&_td]:text-gray-300 [&_td]:border-b [&_td]:border-white/5 [&_td]:text-[15px] [&_td]:font-light
-														[&_tr:hover]:bg-white/[0.02] [&_tr]:transition-colors
+														[&_tr:hover]:bg-white/2 [&_tr]:transition-colors
 														[&_td:first-child]:text-white [&_td:first-child]:font-bold [&_td:first-child]:tracking-tight [&_td:first-child]:text-base"
                                                     dangerouslySetInnerHTML={{ __html: section.content }}
                                                 />
@@ -363,7 +382,7 @@ export default async function DepartmentGenericPage({
             </section>
 
             <Footer />
-        </main>
+        </main >
     );
 }
 

@@ -79,6 +79,64 @@ function SubMenuItem({ child }: { child: any }) {
     );
 }
 
+function MobileSubMenu({ item, closeMenu }: { item: any; closeMenu: () => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    if (!item.children) {
+        return (
+            <Link
+                href={item.href}
+                onClick={closeMenu}
+                className="block py-4 text-sm font-bold uppercase tracking-[0.2em] text-gray-300 hover:text-[#00FFCC] border-b border-white/5"
+            >
+                {item.label}
+            </Link>
+        );
+    }
+
+    return (
+        <div className="border-b border-white/5">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between py-4 text-sm font-bold uppercase tracking-[0.2em] text-gray-300 hover:text-[#00FFCC]"
+            >
+                {item.label}
+                <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[1000px] mb-4' : 'max-h-0'}`}>
+                <ul className="flex flex-col gap-2 pl-4">
+                    {item.children.map((child: any) => (
+                        <li key={child.label}>
+                            <Link
+                                href={child.href}
+                                onClick={closeMenu}
+                                className="block py-2 text-[12px] font-medium text-gray-400 hover:text-[#00FFCC]"
+                            >
+                                {child.label}
+                            </Link>
+                            {child.children && (
+                                <ul className="flex flex-col gap-1 pl-4 mt-1">
+                                    {child.children.map((gc: any) => (
+                                        <li key={gc.label}>
+                                            <Link
+                                                href={gc.href}
+                                                onClick={closeMenu}
+                                                className="block py-1.5 text-[11px] text-gray-500 hover:text-[#00FFCC]"
+                                            >
+                                                {gc.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -101,6 +159,20 @@ export default function Navbar() {
 
     const isDeptPage = pathname.startsWith('/department/') && pathname !== '/department';
     const deptSlug = isDeptPage ? pathname.split('/')[2] : '';
+
+    // Prevent scroll when mobile menu is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+    }, [isOpen]);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setIsOpen(false);
+    }, [pathname]);
 
     // Close profile dropdown when clicking outside
     useEffect(() => {
@@ -364,7 +436,7 @@ export default function Navbar() {
                 {/* TIER 1: UTILITY BAR */}
                 <div className="bg-[#002A28] border-b border-white/5 h-[40px] flex items-center justify-between px-6 md:px-12 relative">
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 border-r border-white/10 pr-4">
+                        <div className="flex items-center gap-4 border-r border-white/10 pr-4">
                             <a href="#" className="text-gray-400 hover:text-[#00FFCC] transition-colors">
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                             </a>
@@ -377,14 +449,14 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    {/* CENTERED CONTACT INFO */}
-                    <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                        <span className="flex items-center gap-2"><Phone size={12} className="text-[#00FFCC]" /> +91 385 2413031</span>
-                        <span className="flex items-center gap-2"><Mail size={12} className="text-[#00FFCC]" /> admin@nitmanipur.ac.in</span>
+                    {/* CENTERED CONTACT INFO - HUDDEN ON SMALL SCREENS */}
+                    <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                        <span className="flex items-center gap-2 font-mono"><Phone size={12} className="text-[#00FFCC]" /> +91 385 2413031</span>
+                        <span className="flex items-center gap-2 font-mono"><Mail size={12} className="text-[#00FFCC]" /> admin@nitmanipur.ac.in</span>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-4 text-white text-xs font-bold mr-2">
+                    <div className="flex items-center gap-4 md:gap-6">
+                        <div className="hidden min-[400px]:flex items-center gap-4 text-white text-xs font-bold mr-2">
                             <button onClick={() => setFontSize(prev => Math.max(prev - 10, 80))} className="hover:text-[#00FFCC]">A-</button>
                             <button onClick={() => setFontSize(100)} className="hover:text-[#00FFCC]">A</button>
                             <button onClick={() => setFontSize(prev => Math.min(prev + 10, 130))} className="hover:text-[#00FFCC]">A+</button>
@@ -393,109 +465,114 @@ export default function Navbar() {
                             <button onClick={() => setIsInverted(true)} className="w-7 h-8 bg-black border border-white/20 rounded flex items-center justify-center text-white text-[10px] font-black">A</button>
                             <button onClick={() => setIsInverted(false)} className="w-7 h-8 bg-[#E5E7EB] border border-black/10 rounded flex items-center justify-center text-black text-[10px] font-black">A</button>
                         </div>
-                        <select className="bg-transparent text-[10px] font-bold uppercase text-gray-400 focus:outline-none cursor-pointer">
-                            <option value="en">EN</option>
-                            <option value="hi">HI</option>
-                        </select>
+                        <div className="h-4 w-px bg-white/10 hidden min-[400px]:block" />
+                        <button
+                            onClick={() => setIsTTSEnabled(!isTTSEnabled)}
+                            className={`w-fit h-8 px-4 rounded-full flex items-center justify-center transition-all ${isTTSEnabled ? 'bg-[#00FFCC] text-[#013A33] shadow-[0_0_15px_rgba(0,255,204,0.3)]' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                            title={isTTSEnabled ? "Disable Screen Reader" : "Enable Screen Reader"}
+                        >
+                            {isTTSEnabled ? (<><span className='text-[12px] mr-2'>Screen Reader On</span><Volume2 size={16} /></>) : (<><span className='text-[12px] mr-2'>Screen Reader Off</span><VolumeX size={16} /></>)}
+                        </button>
                     </div>
                 </div>
 
                 {/* TIER 2: LOGO & ACTIONS BAR */}
-            <div className={`relative w-full h-fit px-6 md:px-12 flex h-[70px] z-[120] items-center justify-between transition-all duration-500 border-b border-white/5 ${mounted && scrolled ? 'bg-[#013A33]/95 backdrop-blur-xl' : 'bg-[#013A33]/60'}`}>
-                
-                <Link href="/" className="flex items-center gap-4 no-invert">
-                    <Image
-                        src={`${DRUPAL_DOMAIN}/sites/default/files/2026-01/nitm_logo.webp`}
-                        alt="NITM Logo"
-                        width={1000}
-                        height={500}
-                        className="object-contain h-[200px] w-fit"
-                        unoptimized={process.env.NODE_ENV === 'development'}
-                    />
-                </Link>
+                <div className={`relative w-full px-6 md:px-12 h-fit flex h-[70px] z-[120] items-center justify-between transition-all duration-500 border-b border-white/5 ${mounted && scrolled ? 'bg-[#013A33]/95 backdrop-blur-xl' : 'bg-[#013A33]/60'}`}>
 
-                <div className="flex items-center gap-4">
-                    <div className="hidden md:flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-1.5 gap-2">
-                        <Search size={14} className="text-gray-400" />
-                        <input type="text" placeholder="Search..." className="bg-transparent text-[11px] text-white focus:outline-none w-32" />
+                    <Link href="/" className="flex items-center gap-4 no-invert">
+                        <Image
+                            src={`${DRUPAL_DOMAIN}/sites/default/files/2026-01/nitm_logo.webp`}
+                            alt="NITM Logo"
+                            width={1000}
+                            height={500}
+                            className="object-contain h-[140px] md:h-[200px] w-fit"
+                            unoptimized={process.env.NODE_ENV === 'development'}
+                        />
+                    </Link>
+
+                    <div className="flex items-center gap-4">
+                        <div className="hidden xl:flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-1.5 gap-2">
+                            <Search size={14} className="text-gray-400" />
+                            <input type="text" placeholder="Search..." className="bg-transparent text-[11px] text-white focus:outline-none w-32" />
+                        </div>
+
+                        {session ? (
+                            <div className="relative" ref={profileDropdownRef}>
+                                <button
+                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                    className="flex items-center gap-3 pl-4 pr-2 py-1 rounded-full border border-[#00FFCC]/30 bg-[#00FFCC]/5 hover:bg-[#00FFCC]/10 transition-colors"
+                                >
+                                    <div className="flex flex-col items-end hidden sm:flex">
+                                        <span className="text-[9px] font-black uppercase tracking-wider text-[#00FFCC]">
+                                            {session.user?.name?.split(' ')[0] || 'Account'}
+                                        </span>
+                                    </div>
+                                    <div className="w-7 h-7 rounded-full bg-[#00FFCC] flex items-center justify-center text-[#013A33]">
+                                        <ChevronDown size={14} className={`transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                    </div>
+                                </button>
+
+                                {isProfileOpen && (
+                                    <div className="absolute right-0 mt-3 w-64 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[120] animate-in fade-in slide-in-from-top-2">
+                                        {/* SESSION ACTIONS */}
+                                        <Link href={`${DRUPAL_DOMAIN}/admin/content`} className="flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5">
+                                            <LayoutDashboard size={14} /> Dashboard
+                                        </Link>
+
+                                        {/* PORTAL LINKS (Integrated when logged in) */}
+                                        <div className="my-2 border-t border-white/5" />
+                                        <div className="px-4 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Quick Access</div>
+                                        {portalDropdownItems.filter(i => i.label !== 'Faculty/Staff login').map((option) => (
+                                            <Link
+                                                key={option.label}
+                                                href={option.href}
+                                                className="block px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
+                                            >
+                                                {option.label}
+                                            </Link>
+                                        ))}
+
+                                        <div className="my-2 border-t border-white/5" />
+                                        <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/10 transition-colors">
+                                            <LogOut size={14} /> Sign Out
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="hidden sm:block relative" ref={loginDropdownRef}>
+                                <button
+                                    onClick={() => setIsLoginOpen(!isLoginOpen)}
+                                    className="bg-[#00FFCC] text-[#013A33] px-6 h-9 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2"
+                                >
+                                    Login
+                                    <ChevronDown size={12} className={`transition-transform duration-300 ${isLoginOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isLoginOpen && (
+                                    <div className="absolute right-0 mt-3 w-56 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[120] animate-in fade-in slide-in-from-top-2">
+                                        {portalDropdownItems.map((option) => (
+                                            <Link
+                                                key={option.label}
+                                                href={option.href}
+                                                onClick={() => setIsLoginOpen(false)}
+                                                className="block px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
+                                            >
+                                                {option.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        <button onClick={() => setIsOpen(!isOpen)} className="xl:hidden text-[#00FFCC] p-2 hover:bg-white/5 rounded-full transition-colors">
+                            {isOpen ? <X size={28} /> : <Menu size={28} />}
+                        </button>
                     </div>
-
-                    {session ? (
-                        <div className="relative" ref={profileDropdownRef}>
-                            <button 
-                                onClick={() => setIsProfileOpen(!isProfileOpen)} 
-                                className="flex items-center gap-3 pl-4 pr-2 py-1 rounded-full border border-[#00FFCC]/30 bg-[#00FFCC]/5 hover:bg-[#00FFCC]/10 transition-colors"
-                            >
-                                <div className="flex flex-col items-end hidden md:flex">
-                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#00FFCC]">
-                                        {session.user?.name || 'Account'}
-                                    </span>
-                                </div>
-                                <div className="w-7 h-7 rounded-full bg-[#00FFCC] flex items-center justify-center text-[#013A33]">
-                                    <ChevronDown size={14} className={`transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
-                                </div>
-                            </button>
-
-                            {isProfileOpen && (
-                                <div className="absolute right-0 mt-3 w-64 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[120] animate-in fade-in slide-in-from-top-2">
-                                    {/* SESSION ACTIONS */}
-                                    <Link href={`${DRUPAL_DOMAIN}/admin/content`} className="flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5">
-                                        <LayoutDashboard size={14} /> Dashboard
-                                    </Link>
-                                    
-                                    {/* PORTAL LINKS (Integrated when logged in) */}
-                                    <div className="my-2 border-t border-white/5" />
-                                    <div className="px-4 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Quick Access</div>
-                                    {portalDropdownItems.filter(i => i.label !== 'Faculty/Staff login').map((option) => (
-                                        <Link
-                                            key={option.label}
-                                            href={option.href}
-                                            className="block px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
-                                        >
-                                            {option.label}
-                                        </Link>
-                                    ))}
-
-                                    <div className="my-2 border-t border-white/5" />
-                                    <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/10 transition-colors">
-                                        <LogOut size={14} /> Sign Out
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="relative" ref={loginDropdownRef}>
-                            <button
-                                onClick={() => setIsLoginOpen(!isLoginOpen)}
-                                className="bg-[#00FFCC] text-[#013A33] px-6 h-9 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2"
-                            >
-                                Portal Login
-                                <ChevronDown size={12} className={`transition-transform duration-300 ${isLoginOpen ? 'rotate-180' : ''}`} />
-                            </button>
-
-                            {isLoginOpen && (
-                                <div className="absolute right-0 mt-3 w-56 bg-[#002A28]/98 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl py-2 z-[120] animate-in fade-in slide-in-from-top-2">
-                                    {portalDropdownItems.map((option) => (
-                                        <Link
-                                            key={option.label}
-                                            href={option.href}
-                                            onClick={() => setIsLoginOpen(false)}
-                                            className="block px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#00FFCC] hover:bg-white/5 transition-all"
-                                        >
-                                            {option.label}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    <button onClick={() => setIsOpen(!isOpen)} className="xl:hidden text-white"><Menu size={24} /></button>
                 </div>
-            </div>
 
-                {/* TIER 3: CONTEXTUAL NAVIGATION BAR */}
-                <div className={`w-full px-6 md:px-12 flex h-11 z-[110] items-center justify-center transition-all duration-500 border-b border-white/5 ${mounted && scrolled ? 'bg-[#013A33]/95 backdrop-blur-xl border-[#00FFCC]/20' : 'bg-[#013A33]/60'
-                    }`}>
+                {/* TIER 3: CONTEXTUAL NAVIGATION BAR - HIDDEN ON MOBILE/TABLET */}
+                <div className={`hidden xl:flex w-full px-6 md:px-12 h-11 z-[110] items-center justify-center transition-all duration-500 border-b border-white/5 ${mounted && scrolled ? 'bg-[#013A33]/95 backdrop-blur-xl border-[#00FFCC]/20' : 'bg-[#013A33]/60'}`}>
                     <ul className="flex items-center justify-center gap-8 h-full">
                         {activeLinks.map((item) => (
                             <li key={item.label} className="relative group h-full flex items-center">
@@ -522,6 +599,74 @@ export default function Navbar() {
                     </ul>
                 </div>
             </nav>
+
+            {/* MOBILE DRAWER OVERLAY */}
+            <div className={`fixed inset-0 z-[200] transition-all duration-500 xl:hidden ${isOpen ? 'visible' : 'invisible'}`}>
+                {/* Backdrop */}
+                <div
+                    className={`absolute inset-0 bg-[#013A33]/90 backdrop-blur-md transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                    onClick={() => setIsOpen(false)}
+                />
+
+                {/* Drawer Content */}
+                <div className={`absolute right-0 top-0 h-full w-[85%] max-w-sm bg-[#002A28] border-l border-white/10 shadow-2xl transition-transform duration-500 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FFCC]">Navigation</span>
+                        <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                            <X size={24} />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                        {/* Mobile Search */}
+                        <div className="mb-8 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00FFCC]/60" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Search everything..."
+                                className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[#00FFCC]/50 transition-colors"
+                            />
+                        </div>
+
+                        {/* Nav Items Accordion */}
+                        <div className="flex flex-col">
+                            {activeLinks.map((item) => (
+                                <MobileSubMenu key={item.label} item={item} closeMenu={() => setIsOpen(false)} />
+                            ))}
+                        </div>
+
+                        {/* Portal Links for Mobile */}
+                        <div className="mt-8 pt-8 border-t border-white/5">
+                            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-4 block">Quick Access Portals</span>
+                            <div className="grid grid-cols-2 gap-3">
+                                {portalDropdownItems.map((item) => (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        onClick={() => setIsOpen(false)}
+                                        className="p-3 bg-white/5 border border-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest text-center hover:bg-[#00FFCC]/10 hover:text-[#00FFCC] transition-all"
+                                    >
+                                        {item.label.replace('Faculty/Staff ', '')}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 border-t border-white/5 bg-[#013A33]/50">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center gap-4 text-gray-400">
+                                <Phone size={14} />
+                                <span className="text-xs font-mono">+91 385 2413031</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-gray-400">
+                                <Mail size={14} />
+                                <span className="text-xs font-mono">admin@nitmanipur.ac.in</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     );
 }

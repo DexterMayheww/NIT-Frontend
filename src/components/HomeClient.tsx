@@ -77,20 +77,20 @@ export function NoticeBoard({ notices: initialNotices = [], newsFiles = [] }: No
     return (
         <div className="flex flex-col lg:flex-row gap-6 w-full h-full text-white">
             {/* Left Side: Tabs */}
-            <div className="w-full lg:w-1/5 flex flex-col gap-3">
+            <div className="w-full lg:w-1/5 grid grid-cols-2 lg:flex lg:flex-col gap-3">
                 {visibleTabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`
-                            flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 border-2
+                            flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 border-2 shrink-0
                             ${activeTab === tab.id
-                                ? 'bg-[#006A58] border-[#00FFCC] shadow-[0_0_15px_rgba(0,255,204,0.3)] scale-105'
+                                ? 'bg-[#006A58] border-[#00FFCC] shadow-[0_0_15px_rgba(0,255,204,0.3)] lg:scale-105'
                                 : 'bg-[#013A33] border-[#006A58] hover:bg-[#004e42]'}
                         `}
                     >
-                        <Image src={tab.icon} alt="icon" width={24} height={24} className="w-6 h-6 invert" />
-                        <span className="font-bold text-sm tracking-wide">{tab.label}</span>
+                        <Image src={tab.icon} alt="icon" width={24} height={24} className="w-5 h-5 md:w-6 md:h-6 invert" />
+                        <span className="font-bold text-[10px] md:text-sm tracking-wide whitespace-nowrap">{tab.label}</span>
                     </button>
                 ))}
             </div>
@@ -103,14 +103,14 @@ export function NoticeBoard({ notices: initialNotices = [], newsFiles = [] }: No
                     {activeTab === 'p1' && (
                         <div className="flex flex-col h-full">
                             {/* Header Section mirrored from P2 */}
-                            <div className="flex justify-between items-center mb-6 border-b border-[#006A58] pb-4 bg-[#001D1B] z-10">
-                                <h2 className="text-2xl font-black text-[#00FFCC] uppercase tracking-tighter">Latest News & Announcements</h2>
-                                <div className='flex gap-4'>
-                                    <span className="text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[#006A58] pb-4 bg-[#001D1B] z-10">
+                                <h2 className="text-xl md:text-2xl font-black text-[#00FFCC] uppercase tracking-tighter">Latest News & Announcements</h2>
+                                <div className='flex gap-4 w-full sm:w-auto'>
+                                    <span className="text-xs md:text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold">
                                         {newsFiles.length} Total
                                     </span>
                                     {isAdmin && (
-                                        <Link href={`${DRUPAL_DOMAIN}/node/101/edit`} target='_blank' className="text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold hover:bg-[#00FFCC] hover:text-[#001D1B] transition-colors">
+                                        <Link href={`${DRUPAL_DOMAIN}/node/101/edit`} target='_blank' className="text-xs md:text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold hover:bg-[#00FFCC] hover:text-[#001D1B] transition-colors">
                                             Add New +
                                         </Link>
                                     )}
@@ -202,17 +202,17 @@ export function NoticeBoard({ notices: initialNotices = [], newsFiles = [] }: No
                     {/* ACADEMIC NOTICES TAB */}
                     {activeTab === 'p2' && (
                         <div className="flex flex-col h-full">
-                            <div className="flex justify-between items-center mb-6 border-b border-[#006A58] pb-4 bg-[#001D1B] z-10">
-                                <h2 className="text-2xl font-black text-[#00FFCC] uppercase tracking-tighter">Academic Notices</h2>
-                                <div className='flex gap-4'>
-                                    <span className="text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[#006A58] pb-4 bg-[#001D1B] z-10">
+                                <h2 className="text-xl md:text-2xl font-black text-[#00FFCC] uppercase tracking-tighter">Academic Notices</h2>
+                                <div className='flex gap-4 w-full sm:w-auto'>
+                                    <span className="text-xs md:text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold">
                                         {notices.length} Total
                                     </span>
-                                    <Link href="/notices" className="text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold hover:bg-[#00FFCC] hover:text-[#001D1B] transition-colors">
+                                    <Link href="/notices" className="text-xs md:text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold hover:bg-[#00FFCC] hover:text-[#001D1B] transition-colors">
                                         View All
                                     </Link>
                                     {isAdmin && (
-                                        <Link href={`${DRUPAL_DOMAIN}/node/add/notice`} target='_blank' className="text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold hover:bg-[#00FFCC] hover:text-[#001D1B] transition-colors">
+                                        <Link href={`${DRUPAL_DOMAIN}/node/add/notice`} target='_blank' className="text-xs md:text-sm bg-[#006A58] px-3 py-1 rounded-full text-[#00FFCC] font-bold hover:bg-[#00FFCC] hover:text-[#001D1B] transition-colors">
                                             Add New +
                                         </Link>
                                     )}
@@ -306,20 +306,20 @@ export function AdmissionTabs({ btech, mtech, msc, phd }: AdmissionTabsProps) {
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 ${tabClasses(tab)} uppercase`}
+                        className={`flex-1 min-w-[100px] ${tabClasses(tab)} uppercase`}
                     >
                         {tab === 'btech' ? 'B.Tech' : tab === 'mtech' ? 'M.Tech' : tab === 'msc' ? 'M.Sc' : 'PhD'}
                     </button>
                 ))}
             </div>
 
-            <div className="p-8 min-h-[300px] text-gray-100">
-                <h3 className="text-3xl font-bold mb-4 text-[#00FFCC]">{content?.title}</h3>
-                <p className="leading-relaxed text-lg font-light opacity-90">
+            <div className="p-6 md:p-8 min-h-[250px] md:min-h-[300px] text-gray-100">
+                <h3 className="text-xl md:text-3xl font-bold mb-4 text-[#00FFCC]">{content?.title}</h3>
+                <p className="leading-relaxed text-sm md:text-lg font-light opacity-90 overflow-hidden line-clamp-6 md:line-clamp-none">
                     {content?.details || "Select a program to view details."}
                 </p>
                 {content?.fileLink && (
-                    <a className='underline mt-4 block' href={`${content.fileLink}`}>
+                    <a className='underline mt-4 block text-xs md:text-base' href={`${content.fileLink}`}>
                         Get the Academic form for {content.title}
                     </a>
                 )}
